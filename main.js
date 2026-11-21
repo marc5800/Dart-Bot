@@ -6,7 +6,7 @@ import {
 const app = document.querySelector("#app");
 const state = {
   page: "dashboard", opponent: "standard", level: 3, game: 501, legs: 5,
-  match: null, undoStack: [], notice: "", lastTurn: null,
+  match: null, undoStack: [], notice: "", lastTurn: null, entryMode: "total", scoreInput: "",
 };
 
 const navItems = [
@@ -87,6 +87,18 @@ function visitsMarkup(visits, label) {
   if (!visits?.length) return `<p class="muted tiny">No visits yet.</p>`;
   return [...visits].slice(-5).reverse().map(v=>`<div class="visit-row"><span>${label}</span><b>${formatVisit(v)}</b><small>${v.before} → ${v.after}</small></div>`).join("");
 }
+function dartLabel(d) {
+  if (d.isBull) return "BULL";
+  if (d.score===25) return "25";
+  if (d.isDouble) return `D${d.score/2}`;
+  if (d.isTreble) return `T${d.score/3}`;
+  return `S${d.score}`;
+}
+function checkoutSuggestion(remaining) {
+  if (remaining>170 || remaining<2) return "No checkout available";
+  const route=checkoutRoute(remaining);
+  return route ? route.map(dartLabel).join(" · ") : "No standard checkout";
+}
 function currentMatchMarkup() {
   const m=state.match, leg=m.currentLeg;
   const botName=opponentName();
@@ -94,16 +106,20 @@ function currentMatchMarkup() {
   const botAvg=leg.botDarts ? (leg.botPoints/leg.botDarts)*3 : 0;
   const lastPlayer=leg.playerVisits.at(-1);
   const lastBot=leg.botVisits.at(-1);
-  return `<section class="page-intro match-intro"><p class="eyebrow">LIVE MATCH · LEG ${m.completedLegs.length+1}</p><h1>${m.game} <span>match</span></h1><p class="muted">${botName} · Best of ${m.bestOf} · Double out</p></section>
-  <div class="match-leg-score"><div><small>LEGS WON</small><strong>${m.playerLegs} – ${m.botLegs}</strong><span>First to ${m.legsToWin}</span></div><div class="leg-pips">${Array.from({length:m.legsToWin},(_,i)=>`<i class="${i<m.playerLegs?"won":""}"></i>`).join("")}<em>:</em>${Array.from({length:m.legsToWin},(_,i)=>`<i class="${i<m.botLegs?"bot-won":""}"></i>`).join("")}</div></div>
-  <div class="live-score-grid">
-    <article class="live-player"><small>YOU</small><strong>${leg.player.remaining}</strong><span>Remaining</span><div class="live-stat"><span>3-dart avg</span><b>${playerAvg.toFixed(1)}</b></div><div class="live-stat"><span>Last visit</span><b>${lastPlayer?formatVisit(lastPlayer):"—"}</b></div></article>
-    <article class="live-player bot-player"><small>${m.opponent.type==="standard"?"BOT · LEVEL "+m.opponent.level:"MY AI OPPONENT"}</small><strong>${leg.botRemaining}</strong><span>Remaining</span><div class="live-stat"><span>3-dart avg</span><b>${botAvg.toFixed(1)}</b></div><div class="live-stat"><span>Last visit</span><b>${lastBot?formatVisit(lastBot):"—"}</b></div></article>
+  const checkout=checkoutSuggestion(leg.player.remaining);
+  const modeToggle=`<div class="entry-mode-switch"><button class="${state.entryMode==="total"?"active":""}" data-mode="total">Total score</button><button class="${state.entryMode==="darts"?"active":""}" data-mode="darts">Individual darts</button></div>`;
+  const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","00","0","back"].map(k=>`<button data-key="${k}">${k==="back"?"⌫":k}</button>`).join("")}</div><button class="primary-button confirm-score" data-action="confirm-total">CONFIRM SCORE</button></div>`;
+  const dartEntry=`<div class="dart-entry-grid">${[0,1,2].map(dartSelect).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="clear-darts">Clear</button><button class="primary-button" data-action="submit-visit">Confirm darts</button></div>`;
+  return `<section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
+  <div class="live-score-grid reference-score-grid">
+    <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${playerAvg.toFixed(2)}</b></div><span class="turn-indicator active-turn">● THROWING</span></article>
+    <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${botAvg.toFixed(2)}</b></div><span class="turn-indicator">WAITING</span></article>
   </div>
-  <section class="score-entry-panel"><div class="section-heading"><h2>Enter your visit</h2><span class="muted">THREE DARTS</span></div>
-    <div class="dart-entry-grid">${[0,1,2].map(dartSelect).join("")}</div>
-    <div class="score-entry-actions"><button class="secondary-button" data-action="clear-darts">Clear</button><button class="primary-button" data-action="submit-visit">Submit visit →</button></div>
-    <p class="tiny muted">Choose each dart: S = single, D = double, T = treble, 25 = outer bull, Bull = 50, Miss = 0. Busts automatically restore your score.</p>
+  <section class="checkout-panel"><small>CHECKOUT SUGGESTION</small><strong>${checkout}</strong></section>
+  <section class="score-entry-panel reference-entry-panel"><div class="section-heading"><h2>SCORE ENTRY</h2></div>
+    ${modeToggle}
+    ${state.entryMode==="total"?totalEntry:dartEntry}
+    <p class="tiny muted">Enter a visit total from 0–180. For a checkout, switch to Individual darts so the finishing double can be recorded correctly.</p>
   </section>
   ${state.notice?`<div class="match-notice">${state.notice}</div>`:""}
   <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2><button class="text-button" data-action="undo">Undo round</button></div>
@@ -167,7 +183,7 @@ function scoreDarts(darts) {
 }
 function checkoutRoute(target) {
   const darts=[];
-  for(let n=1;n<=20;n++){darts.push({score:n});darts.push({score:n*2,isDouble:true});darts.push({score:n*3});}
+  for(let n=1;n<=20;n++){darts.push({score:n});darts.push({score:n*2,isDouble:true});darts.push({score:n*3,isTreble:true});}
   darts.push({score:25},{score:50,isDouble:true,isBull:true});
   const doubles=darts.filter(d=>d.isDouble);
   for(const last of doubles){
@@ -206,6 +222,25 @@ function botTurn() {
   if(checkout){state.notice="Bot checked out. Leg to the bot.";finishLeg("bot");}
   else state.notice=`Bot scored ${visit.pointsScored}. Your turn.`;
 }
+function submitTotalVisit() {
+  try {
+    const total=Number(state.scoreInput);
+    if(state.scoreInput==="" || !Number.isInteger(total) || total<0 || total>180) {
+      throw new Error("Enter a visit score between 0 and 180.");
+    }
+    const remaining=state.match.currentLeg.player.remaining;
+    if(total===remaining) {
+      throw new Error("Use Individual darts to record the finishing double accurately.");
+    }
+    saveUndoSnapshot();
+    let left=total;
+    const darts=[];
+    for(let i=0;i<3;i++){const value=Math.min(60,left);darts.push({score:value});left-=value;}
+    scoreDarts(darts);
+    state.scoreInput="";
+    render();
+  } catch(err){state.notice=err.message;render();}
+}
 function submitPlayerVisit() {
   try {
     const codes=[0,1,2].map(i=>document.querySelector(`#dart-${i}`)?.value||"");
@@ -242,6 +277,16 @@ function render() {
     else if(a==="new-match"){state.match=null;state.undoStack=[];setPage("play");}
     else setPage(a);
   }));
+  app.querySelectorAll("[data-mode]").forEach(el=>el.addEventListener("click",()=>{state.entryMode=el.dataset.mode;state.notice="";render();}));
+  app.querySelectorAll("[data-key]").forEach(el=>el.addEventListener("click",()=>{
+    const k=el.dataset.key;
+    if(k==="back")state.scoreInput=state.scoreInput.slice(0,-1);
+    else if(state.scoreInput.length<3)state.scoreInput+=k;
+    if(Number(state.scoreInput)>180)state.scoreInput=state.scoreInput.slice(0,-k.length);
+    render();
+  }));
+  const confirmTotal=app.querySelector('[data-action="confirm-total"]');
+  if(confirmTotal)confirmTotal.addEventListener("click",submitTotalVisit);
   app.querySelectorAll("[data-opponent]").forEach(el=>el.addEventListener("click",()=>{state.opponent=el.dataset.opponent;render();}));
   app.querySelectorAll("[data-level]").forEach(el=>el.addEventListener("click",()=>{state.level=Number(el.dataset.level);render();}));
   app.querySelectorAll("[data-game]").forEach(el=>el.addEventListener("click",()=>{state.game=Number(el.dataset.game);render();}));
