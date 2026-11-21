@@ -7,7 +7,7 @@ const state = {
   opponent: "standard",
   level: 3,
   game: 501,
-  legs: 3,
+  legs: 5,
   matchStarted: false,
 };
 
@@ -113,7 +113,7 @@ function playSetup() {
       </div>
       <h3>Match format</h3>
       <div class="format-grid">
-        ${[1,3,5,7].map(n => `<button class="format-card ${state.legs === n ? "selected" : ""}" data-legs="${n}">${n === 1 ? "Single leg" : `Best of ${n}`}</button>`).join("")}
+        ${[5,7,9,11].map(n => `<button class="format-card ${state.legs === n ? "selected" : ""}" data-legs="${n}">Best of ${n}</button>`).join("")}
       </div>
       <div class="rules-row"><span>Checkout rules</span><b>Double out</b></div>
       <button class="primary-button full-width" data-action="start-match">Continue to match <span>→</span></button>
@@ -130,7 +130,7 @@ function matchPreview() {
       <div class="versus">VS</div>
       <div><small>OPPONENT</small><strong>${state.game}</strong><span>${name}</span></div>
     </div>
-    <div class="info-panel"><b>Match format</b><p class="muted">${state.legs === 1 ? "One leg" : `Best of ${state.legs}`} · Double out</p><p class="tiny muted">The live scoring interface and automated bot turns are the next integration stage. This preview confirms the match setup only.</p></div>
+    <div class="info-panel"><b>Match format</b><p class="muted">Best of ${state.legs} · Double out</p><p class="tiny muted">The live scoring interface and automated bot turns are the next integration stage. This preview confirms the match setup only.</p></div>
     <button class="primary-button full-width" data-action="back-setup">← Back to setup</button>`;
 }
 
