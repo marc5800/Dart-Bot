@@ -34,3 +34,16 @@ The current UI includes a match setup/preview. Live match turns, persistent stor
 
 
 This starter is packaged with root-level source files to make uploading from a phone easier.
+
+
+## Static deployment build
+
+This project uses plain HTML, CSS and JavaScript. It does not require Vite, React, Rollup or any third-party build dependencies.
+
+Cloudflare Pages settings:
+- Framework preset: None
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Root directory: blank
+
+The `build.mjs` script copies the static site files into `dist` using Node.js built-in filesystem functions.
