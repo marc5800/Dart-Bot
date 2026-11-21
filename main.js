@@ -1,4 +1,3 @@
-import "./style.css";
 import { BOT_LEVELS } from "./engine.js";
 
 const app = document.querySelector("#app");

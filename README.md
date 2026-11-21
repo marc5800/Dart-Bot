@@ -47,3 +47,12 @@ Cloudflare Pages settings:
 - Root directory: blank
 
 The `build.mjs` script copies the static site files into `dist` using Node.js built-in filesystem functions.
+
+
+## Cloudflare static deployment
+Framework preset: None
+Build command: `npm run build`
+Build output directory: `dist`
+Root directory: blank
+
+The stylesheet is linked from `index.html` and the site uses native browser ES modules. The build script uses Node built-ins only; no Vite/Rollup dependency is required.
