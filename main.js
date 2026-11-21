@@ -271,6 +271,7 @@ function render() {
     const a=el.dataset.action;
     if(a==="start-match")startMatch();
     else if(a==="submit-visit")submitPlayerVisit();
+    else if(a==="confirm-total")submitTotalVisit();
     else if(a==="undo")undoRound();
     else if(a==="clear-darts"){[0,1,2].forEach(i=>{const e=document.querySelector(`#dart-${i}`);if(e)e.value="";});}
     else if(a==="abandon-match"){state.match=null;state.undoStack=[];setPage("play");}
@@ -285,8 +286,6 @@ function render() {
     if(Number(state.scoreInput)>180)state.scoreInput=state.scoreInput.slice(0,-k.length);
     render();
   }));
-  const confirmTotal=app.querySelector('[data-action="confirm-total"]');
-  if(confirmTotal)confirmTotal.addEventListener("click",submitTotalVisit);
   app.querySelectorAll("[data-opponent]").forEach(el=>el.addEventListener("click",()=>{state.opponent=el.dataset.opponent;render();}));
   app.querySelectorAll("[data-level]").forEach(el=>el.addEventListener("click",()=>{state.level=Number(el.dataset.level);render();}));
   app.querySelectorAll("[data-game]").forEach(el=>el.addEventListener("click",()=>{state.game=Number(el.dataset.game);render();}));
