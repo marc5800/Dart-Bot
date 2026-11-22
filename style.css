@@ -873,3 +873,47 @@ footer span { color:var(--gold); padding:0 5px; }
     max-height: 58px !important;
   }
 }
+
+
+/* First-nine metrics and larger remaining scores — landscape tablet only. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    font-size: clamp(44px, 5.8vw, 68px) !important;
+  }
+  .landscape-match-layout .reference-average {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    padding-top: 5px !important;
+    margin-top: 4px !important;
+    gap: 0 !important;
+    border-top: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average > i { display: none !important; }
+  .landscape-match-layout .reference-average .average-metric {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    gap: 1px !important;
+    padding: 3px 2px !important;
+  }
+  .landscape-match-layout .reference-average .average-metric:nth-child(odd) {
+    border-right: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric:nth-child(-n+2) {
+    border-bottom: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric span {
+    font-size: clamp(9px, .95vw, 11px) !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+  .landscape-match-layout .reference-average .average-metric b {
+    font-size: clamp(15px, 1.65vw, 20px) !important;
+    line-height: 1.05 !important;
+  }
+}

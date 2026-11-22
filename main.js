@@ -102,17 +102,43 @@ function checkoutSuggestion(remaining) {
   const route=checkoutRoute(remaining);
   return route ? route.map(dartLabel).join(" · ") : "No standard checkout";
 }
+function firstNineTotals(visits=[]) {
+  let darts=0, points=0;
+  for (const visit of visits) {
+    if (darts >= 9) break;
+    const visitDarts = Math.max(0, Number(visit.dartsThrown ?? visit.darts?.length ?? 0));
+    if (!visitDarts) continue;
+    const includedDarts = Math.min(visitDarts, 9 - darts);
+    const visitPoints = visit.bust ? 0 : Number(visit.pointsScored || 0);
+    // Visits are recorded as complete turns; this also supports manually recorded checkouts.
+    points += visitDarts > includedDarts ? visitPoints * (includedDarts / visitDarts) : visitPoints;
+    darts += includedDarts;
+  }
+  return { darts, points, average: darts ? (points / darts) * 3 : 0 };
+}
+function pooledFirstNine(completedLegs, currentVisits, side) {
+  const completedDarts = completedLegs.reduce((sum, leg) => sum + (leg[`${side}FirstNineDarts`] || 0), 0);
+  const completedPoints = completedLegs.reduce((sum, leg) => sum + (leg[`${side}FirstNinePoints`] || 0), 0);
+  const current = firstNineTotals(currentVisits);
+  const darts = completedDarts + current.darts;
+  const points = completedPoints + current.points;
+  return darts ? (points / darts) * 3 : 0;
+}
+
 function currentMatchMarkup() {
   const m=state.match, leg=m.currentLeg;
-  const botName=opponentName();
   const playerAvg=threeDartAverage(leg.player);
   const botAvg=leg.botDarts ? (leg.botPoints/leg.botDarts)*3 : 0;
+  const playerFirstNine=firstNineTotals(leg.player.visits);
+  const botFirstNine=firstNineTotals(leg.botVisits);
   const completedPlayerDarts=m.completedLegs.reduce((n,l)=>n+(l.playerDarts||0),0);
   const completedPlayerPoints=m.completedLegs.reduce((n,l)=>n+(l.playerPoints||0),0);
   const completedBotDarts=m.completedLegs.reduce((n,l)=>n+(l.botDarts||0),0);
   const completedBotPoints=m.completedLegs.reduce((n,l)=>n+(l.botPoints||0),0);
   const playerMatchAvg=(completedPlayerDarts+leg.player.dartsThrown)?((completedPlayerPoints+leg.player.pointsScored)/(completedPlayerDarts+leg.player.dartsThrown))*3:0;
   const botMatchAvg=(completedBotDarts+leg.botDarts)?((completedBotPoints+leg.botPoints)/(completedBotDarts+leg.botDarts))*3:0;
+  const playerMatchFirstNine=pooledFirstNine(m.completedLegs,leg.player.visits,"player");
+  const botMatchFirstNine=pooledFirstNine(m.completedLegs,leg.botVisits,"bot");
   const lastPlayer=leg.playerVisits.at(-1);
   const lastBot=leg.botVisits.at(-1);
   const checkout=checkoutSuggestion(leg.player.remaining);
@@ -122,8 +148,8 @@ function currentMatchMarkup() {
   const checkoutDialog=state.checkoutModal?`<div class="checkout-modal-backdrop"><section class="checkout-modal" role="dialog" aria-modal="true"><h2>Checkout recorded</h2><p>You entered ${leg.player.remaining} to finish. How many darts did you use?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutDarts===n?"selected":""}" data-checkout-darts="${n}">${n} ${n===1?"dart":"darts"}</button>`).join("")}</div><p>How many darts did you throw at a double?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutAttempts===n?"selected":""}" data-checkout-attempts="${n}">${n}</button>`).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="cancel-checkout">Cancel</button><button class="primary-button" data-action="record-checkout">Confirm checkout</button></div></section></div>`:"";
   return `<div class="landscape-match-layout"><section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
   <div class="live-score-grid reference-score-grid">
-    <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><div class="average-metric"><span>LEG AVG</span><b>${playerAvg.toFixed(2)}</b></div><i aria-hidden="true"></i><div class="average-metric"><span>MATCH AVG</span><b>${playerMatchAvg.toFixed(2)}</b></div></div><span class="turn-indicator active-turn">● THROWING</span></article>
-    <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><div class="average-metric"><span>LEG AVG</span><b>${botAvg.toFixed(2)}</b></div><i aria-hidden="true"></i><div class="average-metric"><span>MATCH AVG</span><b>${botMatchAvg.toFixed(2)}</b></div></div><span class="turn-indicator">WAITING</span></article>
+    <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><div class="average-metric"><span>LEG AVG</span><b>${playerAvg.toFixed(2)}</b></div><div class="average-metric"><span>LEG FIRST 9</span><b>${playerFirstNine.average.toFixed(2)}</b></div><div class="average-metric"><span>MATCH AVG</span><b>${playerMatchAvg.toFixed(2)}</b></div><div class="average-metric"><span>MATCH FIRST 9</span><b>${playerMatchFirstNine.toFixed(2)}</b></div></div><span class="turn-indicator active-turn">● THROWING</span></article>
+    <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><div class="average-metric"><span>LEG AVG</span><b>${botAvg.toFixed(2)}</b></div><div class="average-metric"><span>LEG FIRST 9</span><b>${botFirstNine.average.toFixed(2)}</b></div><div class="average-metric"><span>MATCH AVG</span><b>${botMatchAvg.toFixed(2)}</b></div><div class="average-metric"><span>MATCH FIRST 9</span><b>${botMatchFirstNine.toFixed(2)}</b></div></div><span class="turn-indicator">WAITING</span></article>
   </div>
   <section class="checkout-panel"><small>CHECKOUT SUGGESTION</small><strong>${checkout}</strong></section>
   <section class="score-entry-panel reference-entry-panel"><div class="section-heading"><h2>SCORE ENTRY</h2><button class="score-undo-icon" type="button" data-action="undo" aria-label="Undo last visit" title="Undo last visit">↶</button></div>
@@ -177,7 +203,11 @@ function finishLeg(winner) {
     playerPoints:l.player.pointsScored,
     botAverage:Number(l.botDarts?(l.botPoints/l.botDarts*3).toFixed(1):0),
     botDarts:l.botDarts,
-    botPoints:l.botPoints
+    botPoints:l.botPoints,
+    playerFirstNineDarts:firstNineTotals(l.player.visits).darts,
+    playerFirstNinePoints:firstNineTotals(l.player.visits).points,
+    botFirstNineDarts:firstNineTotals(l.botVisits).darts,
+    botFirstNinePoints:firstNineTotals(l.botVisits).points
   });
   if(state.match.playerLegs>=state.match.legsToWin||state.match.botLegs>=state.match.legsToWin){
     state.match.status="complete";state.match.currentLeg=null;state.notice="";
