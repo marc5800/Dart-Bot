@@ -1228,3 +1228,68 @@ footer span { color:var(--gold); padding:0 5px; }
     min-height: 360px !important;
   }
 }
+
+/* Match header: three aligned items on one line; per-player visit counters. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .match-header-strip {
+    display:grid !important;
+    grid-template-columns:1fr auto 1fr !important;
+    align-items:center !important;
+    justify-content:initial !important;
+    text-align:center !important;
+    position:relative !important;
+  }
+  .landscape-match-layout .match-header-strip > div {
+    grid-column:2 !important;
+    grid-row:1 !important;
+    margin:0 !important;
+    display:block !important;
+  }
+  .landscape-match-layout .match-header-strip strong,
+  .landscape-match-layout .match-header-strip .best-of-label,
+  .landscape-match-layout .match-header-strip .leg-count-label {
+    font-size:clamp(16px,2.0vw,22px) !important;
+    line-height:1 !important;
+    font-weight:800 !important;
+    letter-spacing:.015em !important;
+    color:#f3f3f1 !important;
+    white-space:nowrap !important;
+  }
+  .landscape-match-layout .match-header-strip .best-of-label {
+    grid-column:1 !important;
+    grid-row:1 !important;
+    justify-self:start !important;
+    position:static !important;
+    color:var(--muted) !important;
+  }
+  .landscape-match-layout .match-header-strip .leg-count-label {
+    grid-column:3 !important;
+    grid-row:1 !important;
+    justify-self:end !important;
+    position:static !important;
+    color:var(--muted) !important;
+  }
+  .landscape-match-layout .match-header-strip small { display:none !important; }
+  .landscape-match-layout .live-player-heading {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:18px;
+  }
+  .landscape-match-layout .reference-score-grid .live-player-heading > small {
+    font-size:10px !important;
+    font-weight:800;
+    color:var(--gold);
+    letter-spacing:.06em;
+  }
+  .landscape-match-layout .visit-counter {
+    color:var(--muted);
+    font-size:10px;
+    line-height:1;
+    font-weight:700;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+}
