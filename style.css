@@ -375,3 +375,167 @@ footer span { color:var(--gold); padding:0 5px; }
   .landscape-match-layout .number-pad { min-height:180px !important; flex:0 0 auto !important; }
   .landscape-match-layout .number-pad button { min-height:38px !important; height:auto !important; }
 }
+
+
+/* Four-zone landscape match layout: stacked scores left, keypad right, checkout below */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    height:auto !important;
+    min-height:100% !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+  .app-shell.match-active {
+    height:auto !important;
+    min-height:100dvh !important;
+    overflow:visible !important;
+  }
+  .match-active>main {
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+  }
+  .landscape-match-layout {
+    display:grid !important;
+    width:100%;
+    height:auto !important;
+    min-height:0 !important;
+    grid-template-columns:minmax(250px,0.82fr) minmax(360px,1.18fr) !important;
+    grid-template-rows:38px minmax(300px,1fr) 58px !important;
+    grid-template-areas:
+      "head head"
+      "scores entry"
+      "scores checkout" !important;
+    gap:8px 12px !important;
+    align-content:start !important;
+    overflow:visible !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area:head !important;
+    height:38px !important;
+    min-height:38px;
+    margin:0 !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    grid-area:scores !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:repeat(2,minmax(145px,1fr)) !important;
+    gap:9px !important;
+    width:100%;
+    height:100% !important;
+    min-height:300px !important;
+    margin:0 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-width:0 !important;
+    min-height:0 !important;
+    height:100% !important;
+    padding:9px 12px !important;
+    border-radius:13px;
+    justify-content:center;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>small {
+    font-size:clamp(10px,1.2vw,13px) !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>strong {
+    font-size:clamp(38px,5vw,62px) !important;
+    line-height:1 !important;
+    margin:7px 0 !important;
+  }
+  .landscape-match-layout .reference-average {
+    padding-top:6px !important;
+    margin-top:4px !important;
+    gap:3px !important;
+  }
+  .landscape-match-layout .reference-average span { font-size:10px !important; }
+  .landscape-match-layout .reference-average b { font-size:clamp(19px,2.2vw,27px) !important; }
+  .landscape-match-layout .turn-indicator { margin-top:5px !important; font-size:10px !important; }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area:entry !important;
+    width:100% !important;
+    max-width:none !important;
+    height:auto !important;
+    min-height:300px !important;
+    margin:0 !important;
+    padding:8px 10px !important;
+    overflow:visible !important;
+    display:flex !important;
+    flex-direction:column;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading { margin:0 0 3px !important; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:13px !important; }
+  .landscape-match-layout .entry-mode-switch {
+    min-height:23px !important;
+    margin:0 0 4px !important;
+    gap:8px !important;
+  }
+  .landscape-match-layout .entry-mode-switch button { padding:3px 9px !important; font-size:10px !important; }
+  .landscape-match-layout .total-entry {
+    display:flex !important;
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    flex-direction:column;
+  }
+  .landscape-match-layout .total-score-display {
+    height:30px !important;
+    min-height:30px !important;
+    padding:0 !important;
+    font-size:25px !important;
+  }
+  .landscape-match-layout .number-pad {
+    width:100% !important;
+    max-width:none !important;
+    min-height:180px !important;
+    flex:1 1 auto !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(4,minmax(38px,1fr)) !important;
+    gap:6px !important;
+  }
+  .landscape-match-layout .number-pad button {
+    min-height:38px !important;
+    height:100% !important;
+    padding:0 !important;
+    font-size:clamp(19px,2.2vw,27px) !important;
+  }
+  .landscape-match-layout .confirm-score {
+    width:100% !important;
+    max-width:none !important;
+    height:39px !important;
+    min-height:39px !important;
+    flex:0 0 39px !important;
+    margin:5px 0 0 !important;
+    padding:5px !important;
+    font-size:13px !important;
+  }
+  .landscape-match-layout .reference-entry-panel>.tiny { display:none !important; }
+  .landscape-match-layout .checkout-panel {
+    grid-area:checkout !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:58px !important;
+    margin:0 !important;
+    padding:7px 10px !important;
+    display:flex !important;
+    flex-direction:row !important;
+    justify-content:center !important;
+    align-items:center !important;
+    gap:10px !important;
+  }
+  .landscape-match-layout .checkout-panel small { font-size:10px !important; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(16px,2vw,23px) !important; }
+  .landscape-match-layout .match-notice,
+  .landscape-match-layout .info-panel,
+  .landscape-match-layout .landscape-end-match { display:none !important; }
+}
+@media (orientation:landscape) and (min-width:740px) and (max-height:620px) {
+  .landscape-match-layout {
+    grid-template-rows:32px minmax(270px,1fr) 48px !important;
+    gap:5px 8px !important;
+  }
+  .landscape-match-layout .match-header-strip { height:32px !important; min-height:32px; }
+  .landscape-match-layout .reference-score-grid { min-height:270px !important; grid-template-rows:repeat(2,minmax(130px,1fr)) !important; }
+  .landscape-match-layout .reference-entry-panel { min-height:270px !important; padding:5px 7px !important; }
+  .landscape-match-layout .number-pad { min-height:160px !important; }
+  .landscape-match-layout .checkout-panel { min-height:48px !important; }
+}
