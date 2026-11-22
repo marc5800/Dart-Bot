@@ -1173,3 +1173,58 @@ footer span { color:var(--gold); padding:0 5px; }
     box-sizing: border-box !important;
   }
 }
+
+
+
+/* Scroll safety override:
+   keep the landscape layout compact, but never trap the page in a non-scrollable viewport. */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  body {
+    position: relative !important;
+  }
+
+  .app-shell.match-active {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+  }
+
+  .match-active > main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .landscape-match-layout {
+    height: auto !important;
+    min-height: min(660px, calc(100dvh - 110px)) !important;
+    grid-template-rows: 46px minmax(390px, 1fr) 52px !important;
+    overflow: visible !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid,
+  .landscape-match-layout > .reference-entry-panel {
+    height: 100% !important;
+    min-height: 390px !important;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 740px) and (max-height: 620px) {
+  .landscape-match-layout {
+    min-height: 500px !important;
+    grid-template-rows: 40px minmax(360px, 1fr) 46px !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid,
+  .landscape-match-layout > .reference-entry-panel {
+    min-height: 360px !important;
+  }
+}
