@@ -634,3 +634,128 @@ footer span { color:var(--gold); padding:0 5px; }
     max-height: 58px !important;
   }
 }
+
+
+/* DARTS BOT — refined landscape scoring screen */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app { width:100% !important; height:100% !important; min-height:100% !important; overflow:hidden !important; }
+  .app-shell.match-active {
+    width:100% !important; max-width:none !important; height:100dvh !important; min-height:0 !important;
+    padding:6px 12px 8px !important; margin:0 !important; overflow:hidden !important;
+    display:flex !important; flex-direction:column !important;
+  }
+  .match-active > .topbar, .match-active > .bottom-nav, .match-active > footer { display:none !important; }
+  .match-active > main {
+    flex:1 1 auto !important; width:100% !important; min-height:0 !important; height:auto !important;
+    padding:0 !important; margin:0 !important; overflow:hidden !important;
+  }
+  .landscape-match-layout {
+    width:100% !important; height:100% !important; min-height:0 !important; overflow:hidden !important;
+    display:grid !important; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr) !important;
+    grid-template-rows:46px minmax(0,1fr) 54px !important;
+    grid-template-areas:"head head" "scores entry" "checkout checkout" !important;
+    gap:8px 12px !important; align-content:stretch !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area:head !important; height:46px !important; min-height:46px !important; margin:0 !important; padding:3px 12px !important;
+  }
+  .landscape-match-layout .match-header-strip strong { font-size:clamp(19px,2.4vw,27px) !important; line-height:1 !important; }
+  .landscape-match-layout .match-header-strip small { font-size:10px !important; }
+  .landscape-match-layout .reference-score-grid {
+    grid-area:scores !important; display:grid !important; grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:repeat(2,minmax(0,1fr)) !important; gap:8px !important;
+    width:100% !important; height:100% !important; min-height:0 !important; margin:0 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-width:0 !important; min-height:0 !important; height:100% !important; padding:8px 12px !important;
+    border-radius:14px !important; justify-content:center !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > small { font-size:clamp(11px,1.15vw,14px) !important; }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    font-size:clamp(42px,5.2vw,68px) !important; line-height:1 !important; margin:7px 0 9px !important;
+  }
+  .landscape-match-layout .reference-average {
+    width:100% !important; display:grid !important; grid-template-columns:1fr 1fr !important;
+    align-items:stretch !important; gap:0 !important; padding-top:8px !important; margin-top:4px !important;
+    border-top:1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average > div {
+    display:flex !important; flex-direction:column !important; align-items:center !important;
+    justify-content:center !important; gap:3px !important; min-width:0 !important;
+  }
+  .landscape-match-layout .reference-average > div + div { border-left:1px solid #505457 !important; }
+  .landscape-match-layout .reference-average span {
+    font-size:clamp(9px,1vw,12px) !important; color:var(--muted) !important; white-space:nowrap !important;
+  }
+  .landscape-match-layout .reference-average b { font-size:clamp(21px,2.5vw,32px) !important; line-height:1 !important; }
+  .landscape-match-layout .turn-indicator { display:none !important; }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area:entry !important; width:100% !important; max-width:none !important; height:100% !important;
+    min-height:0 !important; margin:0 !important; padding:9px 12px !important; overflow:hidden !important;
+    display:flex !important; flex-direction:column !important; justify-content:flex-start !important;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading { min-height:24px !important; margin:0 !important; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:clamp(15px,1.45vw,19px) !important; }
+  .landscape-match-layout .entry-undo {
+    align-self:flex-start !important; display:grid !important; place-items:center !important;
+    width:27px !important; height:25px !important; min-height:25px !important; margin:0 0 2px !important;
+    padding:0 !important; border:0 !important; border-radius:6px !important; background:transparent !important;
+    color:var(--gold) !important; font-size:25px !important; font-weight:800 !important; line-height:1 !important;
+  }
+  .landscape-match-layout .entry-undo:disabled { opacity:.28 !important; cursor:default !important; }
+  .landscape-match-layout .entry-mode-switch {
+    min-height:27px !important; margin:0 0 4px !important; justify-content:center !important; gap:10px !important;
+  }
+  .landscape-match-layout .entry-mode-switch button { padding:5px 11px !important; font-size:clamp(10px,1vw,13px) !important; }
+  .landscape-match-layout .total-entry {
+    display:flex !important; flex:1 1 auto !important; min-height:0 !important; flex-direction:column !important;
+  }
+  .landscape-match-layout .total-score-display {
+    flex:0 0 auto !important; height:clamp(34px,5vh,48px) !important; min-height:clamp(34px,5vh,48px) !important;
+    padding:0 !important; font-size:clamp(29px,3.3vw,43px) !important; line-height:1 !important;
+  }
+  .landscape-match-layout .number-pad {
+    width:100% !important; max-width:none !important; min-height:0 !important; flex:1 1 auto !important;
+    display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(4,minmax(0,1fr)) !important; gap:clamp(5px,.7vw,9px) !important; margin:0 !important;
+  }
+  .landscape-match-layout .number-pad button {
+    width:100% !important; height:100% !important; min-height:0 !important; padding:2px !important;
+    border:1px solid #4b5159 !important; border-radius:10px !important;
+    background:linear-gradient(145deg,#3a4149,#252a30) !important; color:#fff !important;
+    font-size:clamp(22px,2.8vw,36px) !important; line-height:1 !important;
+  }
+  .landscape-match-layout .number-pad button.del-key {
+    background:#8f171b !important; border-color:#bd282d !important; color:#fff !important;
+    font-size:clamp(17px,2vw,25px) !important;
+  }
+  .landscape-match-layout .number-pad .confirm-score {
+    width:100% !important; height:100% !important; min-height:0 !important; margin:0 !important;
+    padding:2px 4px !important; border:1px solid #e5bd52 !important; border-radius:10px !important;
+    background:linear-gradient(145deg,#e2b843,#b88620) !important; color:#17130a !important;
+    font-size:clamp(17px,2vw,25px) !important; font-weight:800 !important; line-height:1.05 !important;
+    letter-spacing:0 !important; white-space:normal !important; display:grid !important; place-items:center !important;
+  }
+  .landscape-match-layout .number-pad .confirm-score span { display:block !important; text-align:center !important; }
+  .landscape-match-layout .reference-entry-panel > .tiny { display:none !important; }
+  .landscape-match-layout .checkout-panel {
+    grid-area:checkout !important; width:100% !important; height:54px !important; min-height:54px !important;
+    max-height:54px !important; margin:0 !important; padding:6px 12px !important;
+    display:flex !important; flex-direction:row !important; align-items:center !important;
+    justify-content:center !important; gap:12px !important;
+  }
+  .landscape-match-layout .checkout-panel small { font-size:clamp(10px,1.1vw,13px) !important; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(17px,2.2vw,25px) !important; }
+  .landscape-match-layout .match-notice, .landscape-match-layout .info-panel,
+  .landscape-match-layout .landscape-end-match { display:none !important; }
+  .summary-undo { border-color:var(--gold) !important; color:var(--gold) !important; }
+}
+@media (orientation: landscape) and (min-width:740px) and (max-height:560px) {
+  .landscape-match-layout { grid-template-rows:40px minmax(0,1fr) 48px !important; gap:5px 8px !important; }
+  .landscape-match-layout .match-header-strip { height:40px !important; min-height:40px !important; }
+  .landscape-match-layout .checkout-panel { height:48px !important; min-height:48px !important; max-height:48px !important; }
+  .landscape-match-layout .reference-entry-panel { padding:5px 8px !important; }
+  .landscape-match-layout .entry-undo { width:22px !important; height:20px !important; min-height:20px !important; font-size:21px !important; }
+  .landscape-match-layout .entry-mode-switch { min-height:22px !important; }
+  .landscape-match-layout .total-score-display { height:28px !important; min-height:28px !important; }
+}

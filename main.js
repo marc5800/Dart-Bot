@@ -66,6 +66,40 @@ function opponentName() {
 function activeLeg() { return state.match?.currentLeg; }
 function playerLabel() { return "YOU"; }
 
+function visitDartCount(visit) {
+  if (Number.isFinite(Number(visit?.dartsThrown))) return Number(visit.dartsThrown);
+  if (Array.isArray(visit?.darts)) return visit.darts.length;
+  return 3;
+}
+function legPlayerTotals(leg) {
+  const visits = leg?.player?.visits || leg?.playerVisits || [];
+  const points = visits.reduce((sum, visit) => sum + Number(visit?.pointsScored || 0), 0);
+  const dartsFromVisits = visits.reduce((sum, visit) => sum + visitDartCount(visit), 0);
+  return {
+    points: Number.isFinite(Number(leg?.player?.pointsScored)) ? Number(leg.player.pointsScored) : points,
+    darts: Number.isFinite(Number(leg?.player?.dartsThrown)) ? Number(leg.player.dartsThrown) : dartsFromVisits
+  };
+}
+function matchAverage(side, currentLeg = state.match?.currentLeg) {
+  const completed = state.match?.completedLegs || [];
+  const totals = completed.reduce((acc, leg) => {
+    acc.points += Number(leg[`${side}Points`] || 0);
+    acc.darts += Number(leg[`${side}Darts`] || 0);
+    return acc;
+  }, {points:0,darts:0});
+  if (currentLeg) {
+    if (side === "player") {
+      const current = legPlayerTotals(currentLeg);
+      totals.points += current.points;
+      totals.darts += current.darts;
+    } else {
+      totals.points += Number(currentLeg.botPoints || 0);
+      totals.darts += Number(currentLeg.botDarts || 0);
+    }
+  }
+  return totals.darts ? (totals.points / totals.darts) * 3 : 0;
+}
+
 function dartBoardEntry() {
   const slots=[0,1,2].map(i=>`<button class="dart-slot ${state.dartSelections[i]?"filled":""}" data-clear-slot="${i}"><small>DART ${i+1}</small><strong>${state.dartSelections[i]||"—"}</strong></button>`).join("");
   const rows=Array.from({length:20},(_,i)=>i+1);
@@ -107,26 +141,29 @@ function currentMatchMarkup() {
   const botName=opponentName();
   const playerAvg=threeDartAverage(leg.player);
   const botAvg=leg.botDarts ? (leg.botPoints/leg.botDarts)*3 : 0;
+  const playerMatchAvg=matchAverage("player",leg);
+  const botMatchAvg=matchAverage("bot",leg);
   const lastPlayer=leg.playerVisits.at(-1);
   const lastBot=leg.botVisits.at(-1);
   const checkout=checkoutSuggestion(leg.player.remaining);
   const modeToggle=`<div class="entry-mode-switch"><button class="${state.entryMode==="total"?"active":""}" data-mode="total">Total score</button><button class="${state.entryMode==="darts"?"active":""}" data-mode="darts">Individual darts</button></div>`;
-  const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","back","0"].map(k=>`<button data-key="${k}">${k==="back"?"DEL":k}</button>`).join("")}<button class="primary-button confirm-score" data-action="confirm-total">CONFIRM SCORE</button></div></div>`;
+  const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","back","0"].map(k=>`<button class="${k==="back"?"del-key":""}" data-key="${k}">${k==="back"?"DEL":k}</button>`).join("")}<button class="primary-button confirm-score" data-action="confirm-total"><span>CONFIRM<br>SCORE</span></button></div></div>`;
   const dartEntry=dartBoardEntry();
   const checkoutDialog=state.checkoutModal?`<div class="checkout-modal-backdrop"><section class="checkout-modal" role="dialog" aria-modal="true"><h2>Checkout recorded</h2><p>You entered ${leg.player.remaining} to finish. How many darts did you use?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutDarts===n?"selected":""}" data-checkout-darts="${n}">${n} ${n===1?"dart":"darts"}</button>`).join("")}</div><p>How many darts did you throw at a double?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutAttempts===n?"selected":""}" data-checkout-attempts="${n}">${n}</button>`).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="cancel-checkout">Cancel</button><button class="primary-button" data-action="record-checkout">Confirm checkout</button></div></section></div>`:"";
   return `<div class="landscape-match-layout"><section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
   <div class="live-score-grid reference-score-grid">
-    <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${playerAvg.toFixed(2)}</b></div><span class="turn-indicator active-turn">● THROWING</span></article>
-    <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${botAvg.toFixed(2)}</b></div><span class="turn-indicator">WAITING</span></article>
+    <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><div><span>LEG AVG</span><b>${playerAvg.toFixed(2)}</b></div><div><span>MATCH AVG</span><b>${playerMatchAvg.toFixed(2)}</b></div></div></article>
+    <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><div><span>LEG AVG</span><b>${botAvg.toFixed(2)}</b></div><div><span>MATCH AVG</span><b>${botMatchAvg.toFixed(2)}</b></div></div></article>
   </div>
   <section class="checkout-panel"><small>CHECKOUT SUGGESTION</small><strong>${checkout}</strong></section>
   <section class="score-entry-panel reference-entry-panel"><div class="section-heading"><h2>SCORE ENTRY</h2></div>
+    <button class="entry-undo" data-action="undo" aria-label="Undo last player and bot turn" title="Undo last turn" ${state.undoStack.length?"":"disabled"}>↶</button>
     ${modeToggle}
     ${state.entryMode==="total"?totalEntry:dartEntry}
     <p class="tiny muted">Enter a visit total from 0–180. For a checkout, switch to Individual darts so the finishing double can be recorded correctly.</p>
   </section>
   ${state.notice?`<div class="match-notice">${state.notice}</div>`:""}
-  <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2><button class="text-button" data-action="undo">Undo round</button></div>
+  <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2></div>
     <div class="visit-columns"><div><h3>You</h3>${visitsMarkup(leg.playerVisits,"YOU")}</div><div><h3>Bot</h3>${visitsMarkup(leg.botVisits,"BOT")}</div></div>
   </section>
   <button class="secondary-button full-width landscape-end-match" data-action="abandon-match">End match</button>${checkoutDialog}</div>`;
@@ -137,6 +174,7 @@ function matchSummary() {
   return `<section class="page-intro"><p class="eyebrow">MATCH COMPLETE</p><h1>${m.playerLegs>m.botLegs?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponentName()} · Best of ${m.bestOf}</p></section>
   <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${m.playerLegs>m.botLegs?"Great work. Match victory secured.":"Good game. Your next challenge awaits."}</p></div>
   <section class="info-panel"><h2>Leg results</h2>${m.completedLegs.map((l,i)=>`<div class="visit-row"><span>Leg ${i+1}</span><b>${l.winner==="player"?"You":"Bot"}</b><small>${l.playerScore} – ${l.botScore}</small></div>`).join("")}</section>
+  ${state.undoStack.length?`<button class="secondary-button full-width summary-undo" data-action="undo">↶ Undo last turn</button>`:""}
   <button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
 }
 
@@ -160,14 +198,26 @@ function startMatch() {
   state.undoStack=[];state.notice="Match started. You're throwing first.";
   setPage("match");
 }
-function saveUndoSnapshot() { state.undoStack.push(structuredClone(state.match)); if(state.undoStack.length>30)state.undoStack.shift(); }
+function saveUndoSnapshot() {
+  state.undoStack.push({
+    match:structuredClone(state.match),
+    scoreInput:state.scoreInput,
+    dartSelections:[...state.dartSelections],
+    entryMode:state.entryMode
+  });
+  if(state.undoStack.length>30)state.undoStack.shift();
+}
 function finishLeg(winner) {
   const l=state.match.currentLeg;
   if(winner==="player")state.match.playerLegs++;else state.match.botLegs++;
   state.match.completedLegs.push({
     winner,playerScore:l.player.remaining,botScore:l.botRemaining,
-    playerAverage:Number(threeDartAverage(l.player).toFixed(1)),
-    botAverage:Number(l.botDarts?(l.botPoints/l.botDarts*3).toFixed(1):0)
+    playerAverage:Number(threeDartAverage(l.player).toFixed(2)),
+    botAverage:Number(l.botDarts?(l.botPoints/l.botDarts*3).toFixed(2):0),
+    playerPoints:legPlayerTotals(l).points,
+    playerDarts:legPlayerTotals(l).darts,
+    botPoints:l.botPoints,
+    botDarts:l.botDarts
   });
   if(state.match.playerLegs>=state.match.legsToWin||state.match.botLegs>=state.match.legsToWin){
     state.match.status="complete";state.match.currentLeg=null;state.notice="";
@@ -238,6 +288,7 @@ function botTurn() {
   else state.notice=`Bot scored ${visit.pointsScored}. Your turn.`;
 }
 function recordManualCheckout() {
+  saveUndoSnapshot();
   const l=state.match.currentLeg, before=l.player.remaining;
   const darts=state.checkoutDarts, attempts=state.checkoutAttempts;
   const visit={before,after:0,pointsScored:before,dartsThrown:darts,darts:[],bust:false,bustReason:null,checkout:true,checkoutAttempts:attempts,checkoutDarts:darts,manualCheckout:true};
@@ -278,8 +329,17 @@ function submitPlayerVisit() {
   } catch(err){state.notice=err.message;render();}
 }
 function undoRound() {
-  if(!state.undoStack.length){state.notice="There is no previous round to undo.";render();return;}
-  state.match=state.undoStack.pop();state.notice="Last player and bot round undone.";render();
+  if(!state.undoStack.length){state.notice="There is no previous turn to undo.";render();return;}
+  const snapshot=state.undoStack.pop();
+  // Accept older in-memory snapshots as well as the full snapshots created by this version.
+  state.match=snapshot.match || snapshot;
+  state.scoreInput=snapshot.scoreInput ?? "";
+  state.dartSelections=[...(snapshot.dartSelections || [])];
+  state.entryMode=snapshot.entryMode || state.entryMode;
+  state.checkoutModal=false;
+  state.notice="Last player turn and the bot's response undone.";
+  if(state.match?.status==="complete")state.match.status="in_progress";
+  render();
 }
 
 function render() {
