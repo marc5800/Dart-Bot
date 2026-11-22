@@ -6,7 +6,7 @@ import {
 const app = document.querySelector("#app");
 const state = {
   page: "dashboard", opponent: "standard", level: 3, game: 501, legs: 5,
-  match: null, undoStack: [], notice: "", lastTurn: null, entryMode: "total", scoreInput: "",
+  match: null, undoStack: [], notice: "", lastTurn: null, entryMode: "total", scoreInput: "", checkoutModal: false, checkoutDarts: 3, checkoutAttempts: 1, dartSelections: [],
 };
 
 const navItems = [
@@ -66,8 +66,11 @@ function opponentName() {
 function activeLeg() { return state.match?.currentLeg; }
 function playerLabel() { return "YOU"; }
 
-function dartSelect(index) {
-  return `<label class="dart-entry"><span>DART ${index+1}</span><select id="dart-${index}" aria-label="Dart ${index+1}"><option value="">Choose dart</option>${dartOptions.map(o=>`<option value="${o}">${o}</option>`).join("")}</select></label>`;
+function dartBoardEntry() {
+  const slots=[0,1,2].map(i=>`<button class="dart-slot ${state.dartSelections[i]?"filled":""}" data-clear-slot="${i}"><small>DART ${i+1}</small><strong>${state.dartSelections[i]||"—"}</strong></button>`).join("");
+  const rows=Array.from({length:20},(_,i)=>i+1);
+  const columns=[["S","SINGLE"],["D","DOUBLE"],["T","TREBLE"]];
+  return `<div class="dart-board-entry"><div class="dart-slots">${slots}</div><div class="dart-target-grid">${columns.map(([prefix,label])=>`<div class="dart-target-column"><b>${label}</b>${rows.map(n=>`<button data-dart-code="${prefix}${n}">${n}</button>`).join("")}</div>`).join("")}</div><div class="bull-row"><button data-dart-code="25"><b>25</b><small>OUTER BULL</small></button><button data-dart-code="BULL"><b>50</b><small>INNER BULL</small></button><button data-dart-code="MISS"><b>MISS</b><small>NO SCORE</small></button></div><div class="score-entry-actions"><button class="secondary-button" data-action="clear-darts">Clear</button><button class="primary-button" data-action="submit-visit" ${state.dartSelections.length!==3?"disabled":""}>CONFIRM DARTS</button></div></div>`;
 }
 function dartFromCode(code) {
   if (code==="MISS") return {score:0};
@@ -76,7 +79,7 @@ function dartFromCode(code) {
   const mult=code[0], n=Number(code.slice(1));
   if (!n || n<1 || n>20) throw new Error("Choose a valid dart for all three darts.");
   const factor=mult==="T"?3:mult==="D"?2:1;
-  return {score:n*factor,isDouble:mult==="D"};
+  return {score:n*factor,isDouble:mult==="D",isTreble:mult==="T"};
 }
 function formatVisit(v) {
   if (v.bust) return "BUST";
@@ -109,8 +112,9 @@ function currentMatchMarkup() {
   const checkout=checkoutSuggestion(leg.player.remaining);
   const modeToggle=`<div class="entry-mode-switch"><button class="${state.entryMode==="total"?"active":""}" data-mode="total">Total score</button><button class="${state.entryMode==="darts"?"active":""}" data-mode="darts">Individual darts</button></div>`;
   const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","00","0","back"].map(k=>`<button data-key="${k}">${k==="back"?"⌫":k}</button>`).join("")}</div><button class="primary-button confirm-score" data-action="confirm-total">CONFIRM SCORE</button></div>`;
-  const dartEntry=`<div class="dart-entry-grid">${[0,1,2].map(dartSelect).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="clear-darts">Clear</button><button class="primary-button" data-action="submit-visit">Confirm darts</button></div>`;
-  return `<div class="landscape-match-layout"><section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
+  const dartEntry=dartBoardEntry();
+  const checkoutDialog=state.checkoutModal?`<div class="checkout-modal-backdrop"><section class="checkout-modal" role="dialog" aria-modal="true"><h2>Checkout recorded</h2><p>You entered ${leg.player.remaining} to finish. How many darts did you use?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutDarts===n?"selected":""}" data-checkout-darts="${n}">${n} ${n===1?"dart":"darts"}</button>`).join("")}</div><p>How many darts did you throw at a double?</p><div class="choice-row">${[1,2,3].map(n=>`<button class="${state.checkoutAttempts===n?"selected":""}" data-checkout-attempts="${n}">${n}</button>`).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="cancel-checkout">Cancel</button><button class="primary-button" data-action="record-checkout">Confirm checkout</button></div></section></div>`:"";
+  return `<section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
   <div class="live-score-grid reference-score-grid">
     <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${playerAvg.toFixed(2)}</b></div><span class="turn-indicator active-turn">● THROWING</span></article>
     <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${botAvg.toFixed(2)}</b></div><span class="turn-indicator">WAITING</span></article>
@@ -125,7 +129,7 @@ function currentMatchMarkup() {
   <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2><button class="text-button" data-action="undo">Undo round</button></div>
     <div class="visit-columns"><div><h3>You</h3>${visitsMarkup(leg.playerVisits,"YOU")}</div><div><h3>Bot</h3>${visitsMarkup(leg.botVisits,"BOT")}</div></div>
   </section>
-  <button class="secondary-button full-width landscape-end-match" data-action="abandon-match">End match</button></div>`;
+  <button class="secondary-button full-width" data-action="abandon-match">End match</button>${checkoutDialog}`;
 }
 
 function matchSummary() {
@@ -182,15 +186,26 @@ function scoreDarts(darts) {
   else {state.notice=`You scored ${visit.pointsScored}. Bot is throwing.`;botTurn();}
 }
 function checkoutRoute(target) {
-  const darts=[];
-  for(let n=1;n<=20;n++){darts.push({score:n});darts.push({score:n*2,isDouble:true});darts.push({score:n*3,isTreble:true});}
-  darts.push({score:25},{score:50,isDouble:true,isBull:true});
-  const doubles=darts.filter(d=>d.isDouble);
-  for(const last of doubles){
-    if(last.score===target)return [last];
-    for(const first of darts){
-      if(first.score+last.score===target)return [first,last];
-      for(const second of darts)if(first.score+second.score+last.score===target)return [first,second,last];
+  if (!Number.isInteger(target) || target < 2 || target > 170) return null;
+  const preferredDoubles=[20,16,18,10,8,12,14,6,4,2,1,5,9,7,3,11,13,15,17,19];
+  const finishers=preferredDoubles.map(n=>({score:n*2,isDouble:true,label:`D${n}`})).concat([{score:50,isDouble:true,isBull:true,label:"BULL"}]);
+  const scoring=[];
+  for(let n=1;n<=20;n++){
+    scoring.push({score:n,label:`S${n}`});
+    scoring.push({score:n*2,isDouble:true,label:`D${n}`});
+    scoring.push({score:n*3,isTreble:true,label:`T${n}`});
+  }
+  scoring.push({score:25,label:"25"},{score:50,isDouble:true,isBull:true,label:"BULL"});
+  // Prefer a one-dart finish, then a two-dart route, then a three-dart route.
+  for(const last of finishers) if(last.score===target) return [last];
+  for(const last of finishers) {
+    for(const first of scoring) if(first.score+last.score===target) return [first,last];
+  }
+  for(const last of finishers) {
+    for(const first of scoring) {
+      for(const second of scoring) {
+        if(first.score+second.score+last.score===target) return [first,second,last];
+      }
     }
   }
   return null;
@@ -222,6 +237,17 @@ function botTurn() {
   if(checkout){state.notice="Bot checked out. Leg to the bot.";finishLeg("bot");}
   else state.notice=`Bot scored ${visit.pointsScored}. Your turn.`;
 }
+function recordManualCheckout() {
+  const l=state.match.currentLeg, before=l.player.remaining;
+  const darts=state.checkoutDarts, attempts=state.checkoutAttempts;
+  const visit={before,after:0,pointsScored:before,dartsThrown:darts,darts:[],bust:false,bustReason:null,checkout:true,checkoutAttempts:attempts,checkoutDarts:darts,manualCheckout:true};
+  l.player={...l.player,remaining:0,dartsThrown:l.player.dartsThrown+darts,pointsScored:l.player.pointsScored+before,visits:[...l.player.visits,visit],finished:true,busted:false};
+  l.playerVisits.push(visit);
+  state.checkoutModal=false;state.scoreInput="";
+  state.notice="Checkout! Leg won.";
+  finishLeg("player");
+  render();
+}
 function submitTotalVisit() {
   try {
     const total=Number(state.scoreInput);
@@ -230,7 +256,7 @@ function submitTotalVisit() {
     }
     const remaining=state.match.currentLeg.player.remaining;
     if(total===remaining) {
-      throw new Error("Use Individual darts to record the finishing double accurately.");
+      state.checkoutModal=true;state.checkoutDarts=3;state.checkoutAttempts=1;render();return;
     }
     saveUndoSnapshot();
     let left=total;
@@ -243,10 +269,11 @@ function submitTotalVisit() {
 }
 function submitPlayerVisit() {
   try {
-    const codes=[0,1,2].map(i=>document.querySelector(`#dart-${i}`)?.value||"");
-    if(codes.some(v=>!v))throw new Error("Please enter all three darts before submitting.");
+    const codes=state.dartSelections;
+    if(codes.length!==3)throw new Error("Select all three darts before submitting.");
     saveUndoSnapshot();
     scoreDarts(codes.map(dartFromCode));
+    state.dartSelections=[];
     render();
   } catch(err){state.notice=err.message;render();}
 }
@@ -265,18 +292,32 @@ function render() {
   else if(state.page==="stats")content=simplePage("Statistics","Track your scoring, finishing and consistency.","▥","Your performance dashboard");
   else content=simplePage("Match History","Every match, every leg and every improvement.","◷","Your match history");
 
-  app.innerHTML=`<div class="app-shell ${state.page==="match" && state.match?.status!=="complete" ? "match-active" : ""}"><header class="topbar"><button class="brand" data-action="dashboard"><span class="brand-mark">◎</span><span>DARTS <b>BOT</b><small>YOUR GAME. YOUR PROGRESS.</small></span></button><button class="profile-button" aria-label="Profile">MB</button></header><main>${content}</main><nav class="bottom-nav" aria-label="Main navigation">${navItems.map(([page,icon,label])=>`<button class="${state.page===page?"current":""}" data-action="${page}"><span>${icon}</span><small>${label}</small></button>`).join("")}</nav><footer>DARTS BOT <span>·</span> BUILDING YOUR GAME, ONE VISIT AT A TIME</footer></div>`;
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><button class="brand" data-action="dashboard"><span class="brand-mark">◎</span><span>DARTS <b>BOT</b><small>YOUR GAME. YOUR PROGRESS.</small></span></button><button class="profile-button" aria-label="Profile">MB</button></header><main>${content}</main><nav class="bottom-nav" aria-label="Main navigation">${navItems.map(([page,icon,label])=>`<button class="${state.page===page?"current":""}" data-action="${page}"><span>${icon}</span><small>${label}</small></button>`).join("")}</nav><footer>DARTS BOT <span>·</span> BUILDING YOUR GAME, ONE VISIT AT A TIME</footer></div>`;
 
   app.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>{
     const a=el.dataset.action;
     if(a==="start-match")startMatch();
     else if(a==="submit-visit")submitPlayerVisit();
     else if(a==="confirm-total")submitTotalVisit();
+    else if(a==="record-checkout")recordManualCheckout();
+    else if(a==="cancel-checkout"){state.checkoutModal=false;render();}
     else if(a==="undo")undoRound();
-    else if(a==="clear-darts"){[0,1,2].forEach(i=>{const e=document.querySelector(`#dart-${i}`);if(e)e.value="";});}
+    else if(a==="clear-darts"){state.dartSelections=[];render();}
     else if(a==="abandon-match"){state.match=null;state.undoStack=[];setPage("play");}
     else if(a==="new-match"){state.match=null;state.undoStack=[];setPage("play");}
     else setPage(a);
+  }));
+  app.querySelectorAll("[data-dart-code]").forEach(el=>el.addEventListener("click",()=>{
+    if(state.dartSelections.length<3){state.dartSelections.push(el.dataset.dartCode);render();}
+  }));
+  app.querySelectorAll("[data-clear-slot]").forEach(el=>el.addEventListener("click",()=>{
+    const i=Number(el.dataset.clearSlot);state.dartSelections.splice(i,1);render();
+  }));
+  app.querySelectorAll("[data-checkout-darts]").forEach(el=>el.addEventListener("click",()=>{
+    state.checkoutDarts=Number(el.dataset.checkoutDarts);render();
+  }));
+  app.querySelectorAll("[data-checkout-attempts]").forEach(el=>el.addEventListener("click",()=>{
+    state.checkoutAttempts=Number(el.dataset.checkoutAttempts);render();
   }));
   app.querySelectorAll("[data-mode]").forEach(el=>el.addEventListener("click",()=>{state.entryMode=el.dataset.mode;state.notice="";render();}));
   app.querySelectorAll("[data-key]").forEach(el=>el.addEventListener("click",()=>{
