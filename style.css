@@ -253,3 +253,96 @@ footer span { color:var(--gold); padding:0 5px; }
   .landscape-match-layout { min-height:610px; }
   .landscape-match-layout .reference-entry-panel { min-height:560px; }
 }
+
+
+/* Compact live match view: Atlas-inspired, keypad always visible in landscape */
+@media (orientation:landscape) and (min-width:740px) {
+  html,body,#app { width:100%; height:100%; min-height:100%; overflow:hidden; }
+  .app-shell.match-active {
+    width:100%; max-width:none; height:100dvh; min-height:0;
+    padding:5px 12px 7px; margin:0; overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .match-active>.topbar,.match-active>.bottom-nav,.match-active>footer { display:none !important; }
+  .match-active>main { flex:1 1 auto; min-height:0; height:auto; padding:0; margin:0; overflow:hidden; }
+  .landscape-match-layout {
+    width:100%; height:100%; min-height:0; overflow:hidden;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:38px minmax(118px,22%) 38px minmax(0,1fr);
+    grid-template-areas:"head" "scores" "checkout" "entry";
+    gap:6px; align-content:stretch;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area:head; min-height:0; height:38px; margin:0; padding:3px 12px;
+    border-radius:9px; display:flex; align-items:center; justify-content:center;
+  }
+  .landscape-match-layout .match-header-strip strong { font-size:clamp(17px,2.1vw,23px); line-height:1; }
+  .landscape-match-layout .match-header-strip small { font-size:9px; margin-top:2px; }
+  .landscape-match-layout .match-header-strip>span { position:absolute; right:24px; font-size:9px; }
+  .landscape-match-layout .reference-score-grid {
+    grid-area:scores; display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    margin:0; min-height:0; height:100%;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-width:0; min-height:0; height:100%; padding:7px 10px;
+    border-radius:13px; justify-content:center;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>small { font-size:10px; }
+  .landscape-match-layout .reference-score-grid .live-player>strong {
+    font-size:clamp(37px,5.4vw,58px); line-height:1; margin:5px 0 4px;
+  }
+  .landscape-match-layout .reference-average {
+    width:100%; padding-top:5px; margin-top:3px; gap:2px;
+  }
+  .landscape-match-layout .reference-average span { font-size:9px; }
+  .landscape-match-layout .reference-average b { font-size:clamp(18px,2.4vw,25px); }
+  .landscape-match-layout .turn-indicator { margin-top:4px; font-size:9px; }
+  .landscape-match-layout .checkout-panel {
+    grid-area:checkout; min-height:0; height:38px; margin:0; padding:4px 10px;
+    border-radius:9px; display:flex; flex-direction:row; justify-content:center; gap:12px;
+  }
+  .landscape-match-layout .checkout-panel small { font-size:9px; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(15px,2vw,21px); }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area:entry; min-height:0; height:100%; margin:0 auto; width:min(100%,560px);
+    padding:5px 8px; border-radius:12px; display:flex; flex-direction:column;
+    justify-content:flex-start; overflow:hidden;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading { margin:0; min-height:18px; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:12px; margin:0; }
+  .landscape-match-layout .entry-mode-switch { justify-content:center; gap:8px; margin:0 0 3px; min-height:24px; }
+  .landscape-match-layout .entry-mode-switch button { padding:3px 10px; font-size:10px; }
+  .landscape-match-layout .total-entry { display:flex; flex-direction:column; min-height:0; flex:1; }
+  .landscape-match-layout .total-score-display { min-height:29px; height:29px; padding:0; font-size:25px; line-height:1.1; }
+  .landscape-match-layout .number-pad {
+    width:100%; max-width:500px; margin:0 auto; flex:1 1 auto; min-height:0;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(4,minmax(0,1fr)); gap:5px;
+  }
+  .landscape-match-layout .number-pad button {
+    min-height:0; height:100%; padding:0; border-radius:8px;
+    font-size:clamp(18px,2.4vw,25px);
+  }
+  .landscape-match-layout .confirm-score {
+    flex:0 0 39px; height:39px; min-height:39px; margin:5px auto 0;
+    width:100%; max-width:500px; padding:5px; font-size:13px; border-radius:8px;
+  }
+  .landscape-match-layout .reference-entry-panel>.tiny { display:none; }
+  .landscape-match-layout .match-notice { display:none; }
+  .landscape-match-layout .info-panel,
+  .landscape-match-layout .landscape-end-match { display:none !important; }
+  .landscape-match-layout .checkout-modal-backdrop { z-index:50; }
+}
+@media (orientation:landscape) and (min-width:740px) and (max-height:620px) {
+  .landscape-match-layout {
+    grid-template-rows:32px minmax(100px,20%) 32px minmax(0,1fr);
+    gap:4px;
+  }
+  .landscape-match-layout .match-header-strip { height:32px; }
+  .landscape-match-layout .checkout-panel { height:32px; }
+  .landscape-match-layout .reference-entry-panel { padding:3px 7px; }
+  .landscape-match-layout .entry-mode-switch { min-height:20px; }
+  .landscape-match-layout .total-score-display { min-height:24px; height:24px; font-size:21px; }
+  .landscape-match-layout .confirm-score { flex-basis:34px; height:34px; min-height:34px; margin-top:3px; }
+}
