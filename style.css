@@ -917,3 +917,38 @@ footer span { color:var(--gold); padding:0 5px; }
     line-height: 1.05 !important;
   }
 }
+
+
+/* Latest approved Huawei landscape refinement: remove redundant turn labels,
+   balance the four averages, and restore the gold active-player outline. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .reference-score-grid .live-player {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-evenly !important;
+    padding: 12px 8px !important;
+    border: 1px solid #303438 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player.is-throwing,
+  .landscape-match-layout .reference-score-grid .live-player.is-active {
+    border: 2px solid #d5ad4a !important;
+    box-shadow: 0 0 0 1px rgba(213,173,74,.12) !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    margin: 8px 0 10px !important;
+  }
+  .landscape-match-layout .reference-average {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    margin-top: 2px !important;
+    padding-top: 3px !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .landscape-match-layout .reference-average .average-metric {
+    min-height: 0 !important;
+    padding: 4px 2px !important;
+  }
+  .landscape-match-layout .turn-indicator {
+    display: none !important;
+  }
+}
