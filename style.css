@@ -539,3 +539,30 @@ footer span { color:var(--gold); padding:0 5px; }
   .landscape-match-layout .number-pad { min-height:160px !important; }
   .landscape-match-layout .checkout-panel { min-height:48px !important; }
 }
+
+/* Landscape keypad: confirmation occupies the third cell beside DEL and 0 */
+@media (orientation:landscape) and (min-width:740px) {
+  .landscape-match-layout .number-pad {
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(4,minmax(38px,1fr)) !important;
+    align-content:stretch !important;
+  }
+  .landscape-match-layout .number-pad .confirm-score {
+    grid-column:auto !important;
+    grid-row:auto !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:38px !important;
+    height:100% !important;
+    margin:0 !important;
+    padding:3px 5px !important;
+    font-size:clamp(10px,1.15vw,14px) !important;
+    line-height:1.1 !important;
+    letter-spacing:0 !important;
+    white-space:normal !important;
+  }
+  .landscape-match-layout .number-pad button[data-key="back"] {
+    font-size:clamp(12px,1.3vw,16px) !important;
+    letter-spacing:0 !important;
+  }
+}
