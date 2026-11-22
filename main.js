@@ -110,7 +110,7 @@ function currentMatchMarkup() {
   const modeToggle=`<div class="entry-mode-switch"><button class="${state.entryMode==="total"?"active":""}" data-mode="total">Total score</button><button class="${state.entryMode==="darts"?"active":""}" data-mode="darts">Individual darts</button></div>`;
   const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","00","0","back"].map(k=>`<button data-key="${k}">${k==="back"?"⌫":k}</button>`).join("")}</div><button class="primary-button confirm-score" data-action="confirm-total">CONFIRM SCORE</button></div>`;
   const dartEntry=`<div class="dart-entry-grid">${[0,1,2].map(dartSelect).join("")}</div><div class="score-entry-actions"><button class="secondary-button" data-action="clear-darts">Clear</button><button class="primary-button" data-action="submit-visit">Confirm darts</button></div>`;
-  return `<section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
+  return `<div class="landscape-match-layout"><section class="match-header-strip"><div><strong>YOU ${m.playerLegs} – ${m.botLegs} BOT</strong><small>LEGS · BEST OF ${m.bestOf}</small></div><span>LEG ${m.completedLegs.length+1}</span></section>
   <div class="live-score-grid reference-score-grid">
     <article class="live-player ${state.match.status==="in_progress"?"is-throwing":""}"><small>YOU</small><strong>${leg.player.remaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${playerAvg.toFixed(2)}</b></div><span class="turn-indicator active-turn">● THROWING</span></article>
     <article class="live-player bot-player"><small>DART BOT</small><strong>${leg.botRemaining}</strong><div class="reference-average"><span>LEG AVERAGE</span><b>${botAvg.toFixed(2)}</b></div><span class="turn-indicator">WAITING</span></article>
@@ -125,7 +125,7 @@ function currentMatchMarkup() {
   <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2><button class="text-button" data-action="undo">Undo round</button></div>
     <div class="visit-columns"><div><h3>You</h3>${visitsMarkup(leg.playerVisits,"YOU")}</div><div><h3>Bot</h3>${visitsMarkup(leg.botVisits,"BOT")}</div></div>
   </section>
-  <button class="secondary-button full-width" data-action="abandon-match">End match</button>`;
+  <button class="secondary-button full-width landscape-end-match" data-action="abandon-match">End match</button></div>`;
 }
 
 function matchSummary() {
@@ -265,7 +265,7 @@ function render() {
   else if(state.page==="stats")content=simplePage("Statistics","Track your scoring, finishing and consistency.","▥","Your performance dashboard");
   else content=simplePage("Match History","Every match, every leg and every improvement.","◷","Your match history");
 
-  app.innerHTML=`<div class="app-shell"><header class="topbar"><button class="brand" data-action="dashboard"><span class="brand-mark">◎</span><span>DARTS <b>BOT</b><small>YOUR GAME. YOUR PROGRESS.</small></span></button><button class="profile-button" aria-label="Profile">MB</button></header><main>${content}</main><nav class="bottom-nav" aria-label="Main navigation">${navItems.map(([page,icon,label])=>`<button class="${state.page===page?"current":""}" data-action="${page}"><span>${icon}</span><small>${label}</small></button>`).join("")}</nav><footer>DARTS BOT <span>·</span> BUILDING YOUR GAME, ONE VISIT AT A TIME</footer></div>`;
+  app.innerHTML=`<div class="app-shell ${state.page==="match" && state.match?.status!=="complete" ? "match-active" : ""}"><header class="topbar"><button class="brand" data-action="dashboard"><span class="brand-mark">◎</span><span>DARTS <b>BOT</b><small>YOUR GAME. YOUR PROGRESS.</small></span></button><button class="profile-button" aria-label="Profile">MB</button></header><main>${content}</main><nav class="bottom-nav" aria-label="Main navigation">${navItems.map(([page,icon,label])=>`<button class="${state.page===page?"current":""}" data-action="${page}"><span>${icon}</span><small>${label}</small></button>`).join("")}</nav><footer>DARTS BOT <span>·</span> BUILDING YOUR GAME, ONE VISIT AT A TIME</footer></div>`;
 
   app.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>{
     const a=el.dataset.action;
