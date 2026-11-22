@@ -834,3 +834,42 @@ footer span { color:var(--gold); padding:0 5px; }
   .landscape-match-layout .reference-average .average-metric span { font-size: 10px !important; }
   .landscape-match-layout .reference-average .average-metric b { font-size: clamp(17px, 1.9vw, 23px) !important; }
 }
+
+/* Cautious landscape spacing correction: keep the legs subtitle clear and use a little more tablet height. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    grid-template-rows: 62px minmax(382px, 1fr) 58px !important;
+    row-gap: 10px !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    height: 62px !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 7px 12px !important;
+    overflow: visible !important;
+  }
+  .landscape-match-layout .match-header-strip > div {
+    gap: 4px !important;
+  }
+  .landscape-match-layout .match-header-strip strong {
+    line-height: 1.05 !important;
+  }
+  .landscape-match-layout .match-header-strip small {
+    display: block !important;
+    line-height: 1.25 !important;
+    margin-top: 2px !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    min-height: 382px !important;
+    grid-template-rows: repeat(2, minmax(185px, 1fr)) !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    min-height: 382px !important;
+  }
+  /* Keep checkout strip exactly the same height and visual treatment. */
+  .landscape-match-layout .checkout-panel {
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+  }
+}
