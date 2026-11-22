@@ -346,3 +346,32 @@ footer span { color:var(--gold); padding:0 5px; }
   .landscape-match-layout .total-score-display { min-height:24px; height:24px; font-size:21px; }
   .landscape-match-layout .confirm-score { flex-basis:34px; height:34px; min-height:34px; margin-top:3px; }
 }
+
+/* Scroll-safe landscape fallback: keep the compact Atlas layout, never trap the page */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    width:100%; height:auto !important; min-height:100% !important;
+    overflow-x:hidden !important; overflow-y:auto !important;
+  }
+  body { min-height:100dvh; }
+  .app-shell.match-active {
+    height:auto !important; min-height:100dvh !important;
+    overflow:visible !important; display:flex; flex-direction:column;
+  }
+  .match-active>main {
+    height:auto !important; min-height:0 !important;
+    overflow:visible !important; flex:0 0 auto !important;
+  }
+  .landscape-match-layout {
+    height:auto !important; min-height:0 !important; overflow:visible !important;
+    grid-template-rows:38px minmax(118px,22vh) 38px auto !important;
+    align-content:start !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    height:auto !important; min-height:330px !important;
+    overflow:visible !important; justify-content:flex-start;
+  }
+  .landscape-match-layout .total-entry { min-height:270px !important; }
+  .landscape-match-layout .number-pad { min-height:180px !important; flex:0 0 auto !important; }
+  .landscape-match-layout .number-pad button { min-height:38px !important; height:auto !important; }
+}
