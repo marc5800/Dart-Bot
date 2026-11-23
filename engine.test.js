@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  BOT_LEVELS, createLeg, applyVisit, undoVisit, threeDartAverage,
+  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, undoVisit, threeDartAverage,
   summariseLeg, generateBotVisit, createMatch
 } from "./engine.js";
 
@@ -96,4 +96,24 @@ test("bot difficulty profiles include agreed 501 finishing targets", () => {
     Object.fromEntries(Object.entries(BOT_LEVELS).map(([level, p]) => [level, [p.peakDarts, p.normalMaxDarts]])),
     { 1: [25, 30], 2: [21, 26], 3: [18, 22], 4: [16, 18], 5: [15, 17] }
   );
+});
+
+
+test("total-score entry applies 78 from 248 and records a valid three-dart visit", () => {
+  const leg = applyTotalVisit(createLeg(501), 78);
+  const afterThreeVisits = applyTotalVisit(applyTotalVisit(applyTotalVisit(createLeg(501), 100), 100), 53);
+  const visit = applyTotalVisit({ ...createLeg(501), remaining: 248 }, 78);
+  assert.equal(visit.remaining, 170);
+  assert.equal(visit.visits[0].pointsScored, 78);
+  assert.equal(visit.visits[0].dartsThrown, 3);
+  assert.equal(visit.visits[0].totalEntry, true);
+  assert.equal(leg.remaining, 423);
+  assert.equal(afterThreeVisits.remaining, 248);
+});
+
+test("total-score entry busts when it leaves one", () => {
+  const leg = applyTotalVisit({ ...createLeg(501), remaining: 79 }, 78);
+  assert.equal(leg.remaining, 79);
+  assert.equal(leg.visits[0].bust, true);
+  assert.equal(leg.visits[0].pointsScored, 0);
 });

@@ -1,5 +1,5 @@
 import {
-  BOT_LEVELS, createLeg, applyVisit, generateBotVisit,
+  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit,
   summariseLeg, threeDartAverage, firstNineAverage
 } from "./engine.js";
 
@@ -155,7 +155,7 @@ function currentMatchMarkup() {
   <section class="score-entry-panel reference-entry-panel"><div class="section-heading"><h2>SCORE ENTRY</h2><button class="score-undo-icon" type="button" data-action="undo" aria-label="Undo last visit" title="Undo last visit">↶</button></div>
     ${modeToggle}
     ${state.entryMode==="total"?totalEntry:dartEntry}
-    <p class="tiny muted">Enter a visit total from 0–180. For a checkout, switch to Individual darts so the finishing double can be recorded correctly.</p>
+    <p class="tiny muted">Enter a visit total from 0–180. A score leaving 1 is a bust. For a checkout, use Individual darts to record the finishing double.</p>
   </section>
   ${state.notice?`<div class="match-notice">${state.notice}</div>`:""}
   <section class="info-panel"><div class="section-heading"><h2>Recent visits</h2></div>
@@ -265,11 +265,13 @@ function submitTotalVisit() {
       state.checkoutModal=true;state.checkoutDarts=3;state.checkoutAttempts=1;render();return;
     }
     saveUndoSnapshot();
-    let left=total;
-    const darts=[];
-    for(let i=0;i<3;i++){const value=Math.min(60,left);darts.push({score:value});left-=value;}
-    scoreDarts(darts);
+    const l=state.match.currentLeg;
+    l.player=applyTotalVisit(l.player,total);
+    const visit=l.player.visits.at(-1);
+    l.playerVisits.push(visit);
     state.scoreInput="";
+    if(visit.bust) state.notice=`Bust — your score stays at ${visit.before}.`;
+    else { state.notice=`You scored ${visit.pointsScored}. Bot is throwing.`; botTurn(); }
     render();
   } catch(err){state.notice=err.message;render();}
 }
