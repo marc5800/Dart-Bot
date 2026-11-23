@@ -6,8 +6,10 @@ import {
 } from "./engine.js";
 
 test("official bot level bands and checkout defaults", () => {
-  assert.deepEqual(BOT_LEVELS[3], { averageMin: 75, averageMax: 84, checkoutRate: 0.30 });
+  assert.deepEqual(BOT_LEVELS[3], { averageMin: 75, averageMax: 84, peakDarts: 18, normalMaxDarts: 22 });
   assert.equal(BOT_LEVELS[5].averageMax, 104);
+  assert.equal(BOT_LEVELS[1].peakDarts, 25);
+  assert.equal(BOT_LEVELS[5].normalMaxDarts, 17);
 });
 
 test("ordinary visit reduces score and counts actual darts", () => {
@@ -70,5 +72,28 @@ test("match validates setup and snapshots opponent", () => {
 test("bot visit returns a legal visit score", () => {
   const result = generateBotVisit({level:3, rng:()=>0.5});
   assert.ok(result.score >= 0 && result.score <= 180);
+  assert.ok(Array.isArray(result.darts));
+  assert.ok(result.darts.length >= 1 && result.darts.length <= 3);
+  assert.equal(result.dartsThrown, result.darts.length);
   assert.equal(result.dartsThrown, 3);
+});
+
+
+test("bot visits contain individual dart outcomes, not synthetic totals", () => {
+  let seed = 12345;
+  const rng = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const result = generateBotVisit({ level: 3, remaining: 501, rng });
+  assert.ok(result.darts.length >= 1 && result.darts.length <= 3);
+  assert.equal(result.dartsThrown, result.darts.length);
+  for (const dart of result.darts) {
+    assert.ok(Number.isInteger(dart.score));
+    assert.ok(dart.score >= 0 && dart.score <= 60);
+  }
+});
+
+test("bot difficulty profiles include agreed 501 finishing targets", () => {
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(BOT_LEVELS).map(([level, p]) => [level, [p.peakDarts, p.normalMaxDarts]])),
+    { 1: [25, 30], 2: [21, 26], 3: [18, 22], 4: [16, 18], 5: [15, 17] }
+  );
 });

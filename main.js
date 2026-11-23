@@ -39,7 +39,7 @@ function dashboard() {
 
 function levelCards() {
   return Object.entries(BOT_LEVELS).map(([level,p])=>`<button class="level-card ${state.level===Number(level)?"selected":""}" data-level="${level}">
-    <span class="level-number">LEVEL ${level}</span><strong>${p.averageMin}–${p.averageMax}</strong><small>3-dart average</small><span class="checkout-rate">${Math.round(p.checkoutRate*100)}% checkout</span>
+    <span class="level-number">LEVEL ${level}</span><strong>${p.averageMin}–${p.averageMax}</strong><small>3-dart average</small><span class="checkout-rate">501 finish target · ${p.peakDarts} darts peak</span><small>Normal target up to ${p.normalMaxDarts} darts</small>
   </button>`).join("");
 }
 
@@ -225,58 +225,24 @@ function scoreDarts(darts) {
   else if(visit.checkout){state.notice="Leg won!";finishLeg("player");return;}
   else {state.notice=`You scored ${visit.pointsScored}. Bot is throwing.`;botTurn();}
 }
-function checkoutRoute(target) {
-  if (!Number.isInteger(target) || target < 2 || target > 170) return null;
-  const preferredDoubles=[20,16,18,10,8,12,14,6,4,2,1,5,9,7,3,11,13,15,17,19];
-  const finishers=preferredDoubles.map(n=>({score:n*2,isDouble:true,label:`D${n}`})).concat([{score:50,isDouble:true,isBull:true,label:"BULL"}]);
-  const scoring=[];
-  for(let n=1;n<=20;n++){
-    scoring.push({score:n,label:`S${n}`});
-    scoring.push({score:n*2,isDouble:true,label:`D${n}`});
-    scoring.push({score:n*3,isTreble:true,label:`T${n}`});
-  }
-  scoring.push({score:25,label:"25"},{score:50,isDouble:true,isBull:true,label:"BULL"});
-  // Prefer a one-dart finish, then a two-dart route, then a three-dart route.
-  for(const last of finishers) if(last.score===target) return [last];
-  for(const last of finishers) {
-    for(const first of scoring) if(first.score+last.score===target) return [first,last];
-  }
-  for(const last of finishers) {
-    for(const first of scoring) {
-      for(const second of scoring) {
-        if(first.score+second.score+last.score===target) return [first,second,last];
-      }
-    }
-  }
-  return null;
-}
-function botVisitDarts(remaining,level) {
-  const profile=BOT_LEVELS[level]||BOT_LEVELS[3];
-  const route=remaining<=170?checkoutRoute(remaining):null;
-  if(route && Math.random()<profile.checkoutRate) return route;
-  let total=generateBotVisit({level,remaining}).score;
-  // Keep ordinary scoring visits legal under double-out rules.
-  if(total>=remaining)total=Math.max(0,remaining-2);
-  if(remaining-total===1)total=Math.max(0,total-1);
-  const darts=[];
-  let left=total;
-  for(let i=0;i<3;i++){const value=Math.min(60,left);darts.push({score:value});left-=value;}
-  return darts;
-}
 function botTurn() {
   const m=state.match,l=m.currentLeg;
-  const darts=botVisitDarts(l.botRemaining,m.opponent.level||3);
+  const result=generateBotVisit({level:m.opponent.level||3,remaining:l.botRemaining,game:m.game});
+  const darts=result.darts;
   const before=l.botRemaining;
-  let after=before-darts.reduce((s,d)=>s+d.score,0);
-  let checkout=darts.length>0 && after===0 && darts.at(-1).isDouble;
-  // A bot checkout route can use fewer than three darts; count only darts thrown.
-  l.botDarts+=darts.length;l.botPoints+=checkout?before:before-after;
-  l.botRemaining=checkout?0:after;
-  const visit={before,after:l.botRemaining,pointsScored:checkout?before:before-after,dartsThrown:darts.length,darts,bust:false,checkout};
+  const checkout=Boolean(result.checkout);
+  const bust=Boolean(result.bust);
+  const scored=bust?0:darts.reduce((s,d)=>s+d.score,0);
+  l.botDarts+=darts.length;
+  l.botPoints+=scored;
+  l.botRemaining=checkout?0:(bust?before:before-scored);
+  const visit={before,after:l.botRemaining,pointsScored:scored,dartsThrown:darts.length,darts,bust,bustReason:bust?"bust":null,checkout};
   l.botVisits.push(visit);
   if(checkout){state.notice="Bot checked out. Leg to the bot.";finishLeg("bot");}
-  else state.notice=`Bot scored ${visit.pointsScored}. Your turn.`;
+  else if(bust)state.notice=`Bot busts — score remains ${before}. Your turn.`;
+  else state.notice=`Bot scored ${scored}. Your turn.`;
 }
+
 function recordManualCheckout() {
   const l=state.match.currentLeg, before=l.player.remaining;
   const darts=state.checkoutDarts, attempts=state.checkoutAttempts;
