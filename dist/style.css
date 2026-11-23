@@ -1,1 +1,1295 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
+:root {
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #f4f4f2;
+  background: #0b0c0e;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --bg: #0b0c0e;
+  --panel: #17191c;
+  --panel-2: #202226;
+  --line: #303238;
+  --muted: #9b9da3;
+  --gold: #d5ad4a;
+  --gold-soft: #302817;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: var(--bg); }
+button { font: inherit; color: inherit; cursor: pointer; }
+.app-shell { width: min(100%, 980px); margin: 0 auto; min-height: 100vh; padding: 0 22px 26px; }
+.topbar { height: 76px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); }
+.brand { border:0; background:none; display:flex; align-items:center; gap:12px; text-align:left; font-size:15px; font-weight:800; letter-spacing:.08em; }
+.brand b { color:var(--gold); }
+.brand small { display:block; color:var(--muted); font-size:9px; letter-spacing:.14em; font-weight:500; margin-top:3px; }
+.brand-mark { display:grid; place-items:center; width:39px; height:39px; border-radius:12px; color:#151515; background:var(--gold); font-size:27px; }
+.profile-button { border:1px solid var(--line); background:var(--panel); width:39px; height:39px; border-radius:50%; color:var(--gold); font-weight:700; }
+main { padding: 34px 0 110px; }
+.eyebrow { color:var(--gold); letter-spacing:.16em; font-size:10px; font-weight:800; margin:0 0 12px; }
+h1 { font-size:clamp(32px,7vw,54px); line-height:1.04; letter-spacing:-.045em; margin:0 0 12px; }
+h1 span { color:var(--gold); }
+h2 { font-size:21px; margin:0; letter-spacing:-.025em; }
+h3 { font-size:14px; margin:20px 0 10px; }
+.muted { color:var(--muted); line-height:1.6; }
+.welcome { max-width:720px; }
+.welcome > .muted, .page-intro > .muted { max-width:580px; font-size:14px; }
+.hero-cta { width:100%; border:1px solid #715b2b; border-radius:17px; padding:19px; margin-top:24px; background:linear-gradient(110deg,#2b2417,#181714); display:flex; align-items:center; gap:15px; text-align:left; }
+.hero-icon { color:var(--gold); font-size:38px; }
+.hero-cta b { display:block; color:var(--gold); letter-spacing:.07em; font-size:14px; }
+.hero-cta small { display:block; color:#c3c0b7; margin-top:5px; font-size:12px; }
+.arrow { margin-left:auto; color:var(--gold); font-size:24px; }
+.metric-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:20px 0 36px; }
+.metric { min-height:112px; padding:15px; border:1px solid var(--line); background:var(--panel); border-radius:13px; display:flex; flex-direction:column; }
+.metric-symbol { color:var(--gold); font-size:17px; }
+.metric strong { font-size:26px; margin:4px 0; }
+.metric small { font-size:9px; letter-spacing:.1em; color:var(--muted); }
+.section-block { margin-top:34px; }
+.section-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.section-heading .muted { font-size:9px; letter-spacing:.13em; }
+.feature-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.feature-card { min-height:126px; border:1px solid var(--line); background:var(--panel); border-radius:13px; padding:16px; text-align:left; display:flex; flex-direction:column; align-items:flex-start; gap:7px; }
+.feature-card > span { color:var(--gold); font-size:26px; }
+.feature-card b { font-size:13px; }
+.feature-card small { color:var(--muted); font-size:11px; }
+.page-intro { margin-bottom:26px; }
+.opponent-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.opponent-card { text-align:left; border:1px solid var(--line); border-radius:15px; background:var(--panel); padding:18px; display:flex; flex-direction:column; align-items:flex-start; min-height:190px; }
+.opponent-card.selected, .level-card.selected, .format-card.selected { border-color:var(--gold); background:#211d14; box-shadow:inset 0 0 0 1px #8d7137; }
+.large-symbol { color:var(--gold); font-size:35px; display:block; margin-bottom:10px; }
+.opponent-card b { font-size:17px; margin-bottom:6px; }
+.opponent-card small { color:var(--muted); line-height:1.5; font-size:12px; }
+.selection { color:var(--gold); font-size:9px; letter-spacing:.12em; font-weight:800; margin-top:auto; padding-top:16px; }
+.level-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; }
+.level-card { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:13px 8px; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.level-number { color:var(--gold); font-size:9px; font-weight:800; letter-spacing:.1em; }
+.level-card strong { font-size:17px; }
+.level-card small { color:var(--muted); font-size:9px; }
+.checkout-rate { font-size:10px; color:#d7d0bf; }
+.info-panel { border:1px solid var(--line); background:var(--panel); border-radius:15px; padding:20px; margin-top:20px; }
+.info-panel h2 { margin-bottom:12px; }
+.info-panel p { font-size:13px; }
+.weight-row, .rules-row { display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:12px 0; font-size:13px; }
+.weight-row span, .rules-row span { color:var(--muted); }
+.weight-row b, .rules-row b { color:var(--gold); }
+.text-button { padding:12px 0 0; background:none; border:0; color:var(--gold); font-weight:700; font-size:12px; }
+.setup-section { padding-top:5px; }
+.segmented { display:flex; gap:7px; padding:5px; border-radius:12px; background:var(--panel); border:1px solid var(--line); }
+.segmented button { flex:1; padding:12px; background:transparent; border:0; border-radius:9px; font-weight:700; color:var(--muted); }
+.segmented button.active { background:var(--gold); color:#17130a; }
+.format-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.format-card { border:1px solid var(--line); background:var(--panel); padding:12px 5px; border-radius:10px; font-size:12px; }
+.primary-button { background:var(--gold); color:#17130a; border:0; border-radius:12px; padding:15px 18px; font-weight:800; margin-top:18px; }
+.primary-button span { float:right; }
+.full-width { width:100%; }
+.tiny { font-size:10px; }
+.match-preview { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; padding:22px 10px; border:1px solid var(--line); border-radius:15px; background:var(--panel); }
+.match-preview > div:not(.versus) { display:flex; flex-direction:column; align-items:center; gap:7px; }
+.match-preview small { color:var(--muted); font-size:9px; letter-spacing:.12em; }
+.match-preview strong { font-size:42px; color:var(--gold); }
+.match-preview span { font-size:11px; color:var(--muted); text-align:center; }
+.versus { color:var(--muted); font-size:11px; font-weight:800; }
+.bottom-nav { position:fixed; z-index:5; bottom:0; left:50%; transform:translateX(-50%); width:min(100%,980px); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(15,16,18,.96); border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(6,1fr); backdrop-filter:blur(14px); }
+.bottom-nav button { background:none; border:0; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:4px; padding:5px 1px; }
+.bottom-nav button span { font-size:22px; line-height:1.1; }
+.bottom-nav button small { font-size:9px; }
+.bottom-nav button.current { color:var(--gold); }
+footer { text-align:center; color:#65676c; font-size:8px; letter-spacing:.14em; padding:0 0 14px; }
+footer span { color:var(--gold); padding:0 5px; }
+@media (max-width:650px) {
+  .app-shell { padding:0 16px 18px; }
+  main { padding-top:27px; }
+  .metric-grid { grid-template-columns:repeat(2,1fr); }
+  .feature-grid { grid-template-columns:repeat(2,1fr); }
+  .feature-card { min-height:112px; }
+  .level-grid { grid-template-columns:repeat(3,1fr); }
+  .level-card:nth-child(4), .level-card:nth-child(5) { grid-column:span 1; }
+  .opponent-grid { grid-template-columns:1fr; }
+  .opponent-card { min-height:155px; }
+  .format-grid { grid-template-columns:repeat(2,1fr); }
+}
+
+
+/* Live match interface */
+.match-intro { margin-bottom:18px; }
+.match-leg-score { display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:13px 16px; margin-bottom:12px; }
+.match-leg-score > div:first-child { display:flex; flex-direction:column; gap:3px; }
+.match-leg-score small,.live-player > small,.match-result small { color:var(--muted); font-size:9px; letter-spacing:.12em; }
+.match-leg-score strong { color:var(--gold); font-size:24px; }
+.match-leg-score span { color:var(--muted); font-size:10px; }
+.leg-pips { display:flex; align-items:center; gap:4px; }
+.leg-pips i { width:9px; height:9px; border-radius:50%; border:1px solid #686b70; display:block; }
+.leg-pips i.won { background:var(--gold); border-color:var(--gold); }
+.leg-pips i.bot-won { background:#8c929b; border-color:#8c929b; }
+.leg-pips em { color:var(--muted); font-style:normal; font-size:10px; }
+.live-score-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.live-player { background:var(--panel); border:1px solid var(--line); border-radius:15px; padding:17px 14px; display:flex; flex-direction:column; align-items:center; }
+.live-player > strong { color:var(--gold); font-size:clamp(38px,10vw,56px); line-height:1.15; margin:7px 0 2px; font-variant-numeric:tabular-nums; }
+.live-player > span { color:var(--muted); font-size:10px; }
+.live-stat { width:100%; display:flex; justify-content:space-between; gap:5px; border-top:1px solid var(--line); padding-top:9px; margin-top:9px; font-size:10px; }
+.live-stat span { color:var(--muted); }
+.live-stat b { color:#f1f1ef; }
+.bot-player { background:#141619; }
+.score-entry-panel { margin-top:15px; padding:16px; background:var(--panel); border:1px solid var(--line); border-radius:15px; }
+.dart-entry-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+.dart-entry { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.dart-entry span { color:var(--gold); font-size:9px; font-weight:800; letter-spacing:.1em; }
+.dart-entry select { width:100%; min-width:0; padding:12px 5px; background:#0e1012; border:1px solid #41444a; color:#f4f4f2; border-radius:9px; font-size:12px; }
+.score-entry-actions { display:grid; grid-template-columns:.75fr 1.25fr; gap:8px; margin-top:13px; }
+.secondary-button { background:var(--panel-2); color:#f4f4f2; border:1px solid var(--line); border-radius:11px; padding:13px 15px; font-weight:700; margin-top:12px; }
+.score-entry-actions .secondary-button,.score-entry-actions .primary-button { margin:0; }
+.match-notice { margin-top:12px; padding:12px 14px; border:1px solid #68552b; border-radius:10px; background:#211d14; color:#e8d6a7; font-size:12px; }
+.visit-columns { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.visit-columns h3 { margin:4px 0 8px; }
+.visit-row { display:grid; grid-template-columns:1fr auto; gap:3px 8px; padding:9px 0; border-bottom:1px solid var(--line); font-size:11px; }
+.visit-row > span { color:var(--muted); }
+.visit-row > b { color:var(--gold); }
+.visit-row > small { grid-column:1/-1; color:var(--muted); font-size:9px; }
+.match-result { padding:24px; text-align:center; background:var(--panel); border:1px solid var(--line); border-radius:15px; }
+.match-result strong { display:block; color:var(--gold); font-size:54px; margin:8px 0; }
+.match-result p { color:var(--muted); font-size:13px; }
+@media(max-width:420px){.match-leg-score{padding:11px}.live-player{padding:14px 9px}.live-stat{font-size:9px}.dart-entry select{font-size:11px;padding:11px 2px}}
+
+
+/* Match screen visual alignment with the approved reference */
+.match-header-strip { margin:-8px 0 16px; padding:12px 14px; border-radius:14px; background:linear-gradient(100deg,#17191c,#202226); display:flex; justify-content:space-between; align-items:center; text-align:center; }
+.match-header-strip > div { display:flex; flex-direction:column; gap:3px; margin:auto; }
+.match-header-strip strong { font-size:clamp(19px,5vw,28px); letter-spacing:.02em; }
+.match-header-strip small,.match-header-strip > span { color:var(--muted); font-size:10px; letter-spacing:.1em; }
+.reference-score-grid { gap:12px; margin-bottom:16px; }
+.reference-score-grid .live-player { min-height:220px; border-radius:22px; padding:20px 12px 15px; background:linear-gradient(145deg,#25292b,#1b1e20); border:1px solid #303438; }
+.reference-score-grid .live-player.is-throwing { border:2px solid var(--gold); }
+.reference-score-grid .live-player > small { font-size:13px; font-weight:800; color:var(--gold); letter-spacing:.06em; }
+.reference-score-grid .live-player > strong { font-size:clamp(42px,12vw,58px); margin:24px 0 20px; color:#f4f4f2; }
+.reference-average { width:100%; border-top:1px solid #505457; padding-top:17px; display:flex; flex-direction:column; align-items:center; gap:7px; }
+.reference-average span { color:var(--muted); font-size:11px; }
+.reference-average b { font-size:29px; }
+.turn-indicator { margin-top:14px; color:var(--muted); font-size:11px; }
+.active-turn { color:#35b76b; background:#173b2a; border-radius:30px; padding:7px 12px; font-weight:800; }
+.checkout-panel { margin:0 0 16px; padding:18px 12px; border-radius:17px; background:#24282b; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+.checkout-panel small { color:var(--gold); font-size:12px; font-weight:800; }
+.checkout-panel strong { font-size:clamp(22px,6vw,32px); letter-spacing:.03em; }
+.reference-entry-panel { padding:18px; }
+.reference-entry-panel .section-heading { margin-bottom:14px; }
+.entry-mode-switch { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:8px 0 14px; }
+.entry-mode-switch button { border:0; border-radius:22px; padding:8px 13px; background:transparent; color:var(--muted); font-size:12px; }
+.entry-mode-switch button.active { background:#173b2a; color:#35b76b; font-weight:800; }
+.total-entry { text-align:center; }
+.total-score-display { color:var(--gold); font-size:42px; font-weight:800; min-height:58px; padding:4px; font-variant-numeric:tabular-nums; }
+.number-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.number-pad button { min-height:62px; border:0; border-radius:13px; background:#3a3e42; color:#fff; font-size:25px; font-weight:700; }
+.number-pad button:active { background:#555b60; }
+.confirm-score { width:100%; margin-top:10px; min-height:62px; font-size:17px; letter-spacing:.02em; }
+@media(max-width:420px){.reference-score-grid .live-player{min-height:205px;padding:17px 9px 12px}.reference-score-grid .live-player>strong{margin:20px 0 16px}.number-pad button{min-height:58px}.reference-average b{font-size:26px}}
+
+
+/* Huawei landscape: allow scrolling if browser chrome / viewport height leaves less room */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app { height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; }
+  .app-shell.match-active { width:100%; max-width:none; min-height:100dvh; height:auto; padding:8px 16px 16px; overflow:visible; }
+  .match-active .topbar,.match-active .bottom-nav,.match-active footer { display:none !important; }
+  .match-active main { min-height:0; height:auto; padding:0; overflow:visible; }
+  .landscape-match-layout {
+    min-height:calc(100dvh - 24px); height:auto;
+    display:grid; grid-template-columns:minmax(0,.92fr) minmax(390px,1.08fr);
+    grid-template-rows:44px minmax(220px,1fr) auto;
+    grid-template-areas:"head head" "scores entry" "checkout entry";
+    gap:10px 14px; align-content:start;
+  }
+  .landscape-match-layout .match-header-strip { grid-area:head; height:44px; margin:0; padding:4px 12px; }
+  .landscape-match-layout .match-header-strip strong { font-size:clamp(18px,2.2vw,25px); }
+  .landscape-match-layout .reference-score-grid { grid-area:scores; display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:0; min-height:220px; }
+  .landscape-match-layout .reference-score-grid .live-player { min-width:0; min-height:220px; height:100%; padding:12px 8px; border-radius:16px; }
+  .landscape-match-layout .reference-score-grid .live-player>strong { font-size:clamp(40px,5vw,68px); margin:14px 0; }
+  .landscape-match-layout .reference-average { padding-top:9px; gap:5px; }
+  .landscape-match-layout .reference-average b { font-size:clamp(22px,2.6vw,32px); }
+  .landscape-match-layout .turn-indicator { margin-top:10px; font-size:10px; }
+  .landscape-match-layout .checkout-panel { grid-area:checkout; margin:0; padding:10px; min-height:58px; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(18px,2.4vw,27px); }
+  .landscape-match-layout .reference-entry-panel { grid-area:entry; min-height:420px; margin:0; padding:10px; display:flex; flex-direction:column; overflow:visible; }
+  .landscape-match-layout .reference-entry-panel .section-heading { margin:0 0 4px; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:16px; }
+  .landscape-match-layout .entry-mode-switch { margin:2px 0 5px; }
+  .landscape-match-layout .entry-mode-switch button { padding:5px 9px; font-size:11px; }
+  .landscape-match-layout .total-entry { display:flex; flex-direction:column; flex:1; }
+  .landscape-match-layout .total-score-display { min-height:36px; padding:0; font-size:30px; }
+  .landscape-match-layout .number-pad { flex:1; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(4,minmax(42px,1fr)); gap:6px; }
+  .landscape-match-layout .number-pad button { min-height:42px; font-size:clamp(18px,2vw,25px); }
+  .landscape-match-layout .confirm-score { min-height:46px; height:46px; margin-top:6px; padding:7px; font-size:14px; flex:0 0 46px; }
+  .landscape-match-layout .reference-entry-panel>.tiny { display:none; }
+  .landscape-match-layout .info-panel,.landscape-match-layout .landscape-end-match { display:none !important; }
+}
+.dart-board-entry { display:flex; flex-direction:column; gap:8px; min-height:0; }
+.dart-slots { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.dart-slot { background:#202226; border:1px solid var(--line); border-radius:9px; min-width:0; padding:7px 3px; display:flex; flex-direction:column; align-items:center; gap:3px; }
+.dart-slot small { color:var(--muted); font-size:9px; }
+.dart-slot strong { color:var(--gold); font-size:17px; }
+.dart-slot.filled { border-color:var(--gold); }
+.dart-target-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.dart-target-column { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; align-content:start; }
+.dart-target-column>b { grid-column:1/-1; text-align:center; color:var(--gold); font-size:10px; letter-spacing:.06em; padding:3px 0; }
+.dart-target-column button { min-height:29px; border:1px solid var(--line); border-radius:6px; background:#34383c; font-size:12px; font-weight:700; padding:3px; }
+.dart-target-column button:active,.bull-row button:active { border-color:var(--gold); background:#4a4029; }
+.bull-row { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.bull-row button { border:1px solid var(--line); border-radius:8px; background:#25292d; padding:6px 2px; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.bull-row b { color:var(--gold); font-size:16px; }
+.bull-row small { color:var(--muted); font-size:8px; }
+.dart-board-entry .score-entry-actions { margin-top:2px; }
+.dart-board-entry .score-entry-actions button { margin:0; padding:10px 6px; }
+.dart-board-entry button:disabled { opacity:.38; cursor:not-allowed; }
+.checkout-modal-backdrop { position:fixed; inset:0; z-index:20; background:rgba(0,0,0,.78); display:grid; place-items:center; padding:16px; }
+.checkout-modal { width:min(100%,440px); background:#1d2023; border:1px solid var(--gold); border-radius:17px; padding:20px; box-shadow:0 18px 60px #000; }
+.checkout-modal h2 { color:var(--gold); margin-bottom:10px; }
+.checkout-modal p { color:var(--muted); font-size:13px; margin:13px 0 8px; }
+.choice-row { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.choice-row button { background:#303438; border:1px solid var(--line); border-radius:9px; padding:11px 4px; font-size:12px; }
+.choice-row button.selected { border-color:var(--gold); color:var(--gold); background:#302817; }
+.checkout-modal .score-entry-actions { margin-top:16px; }
+.checkout-modal .score-entry-actions button { margin:0; }
+@media (orientation:landscape) and (min-width:740px) {
+  .dart-target-column { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .dart-target-column button { min-height:27px; font-size:11px; }
+}
+@media (orientation:landscape) and (min-width:740px) and (max-height:560px) {
+  .landscape-match-layout { min-height:610px; }
+  .landscape-match-layout .reference-entry-panel { min-height:560px; }
+}
+
+
+/* Compact live match view: Atlas-inspired, keypad always visible in landscape */
+@media (orientation:landscape) and (min-width:740px) {
+  html,body,#app { width:100%; height:100%; min-height:100%; overflow:hidden; }
+  .app-shell.match-active {
+    width:100%; max-width:none; height:100dvh; min-height:0;
+    padding:5px 12px 7px; margin:0; overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .match-active>.topbar,.match-active>.bottom-nav,.match-active>footer { display:none !important; }
+  .match-active>main { flex:1 1 auto; min-height:0; height:auto; padding:0; margin:0; overflow:hidden; }
+  .landscape-match-layout {
+    width:100%; height:100%; min-height:0; overflow:hidden;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:38px minmax(118px,22%) 38px minmax(0,1fr);
+    grid-template-areas:"head" "scores" "checkout" "entry";
+    gap:6px; align-content:stretch;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area:head; min-height:0; height:38px; margin:0; padding:3px 12px;
+    border-radius:9px; display:flex; align-items:center; justify-content:center;
+  }
+  .landscape-match-layout .match-header-strip strong { font-size:clamp(17px,2.1vw,23px); line-height:1; }
+  .landscape-match-layout .match-header-strip small { font-size:9px; margin-top:2px; }
+  .landscape-match-layout .match-header-strip>span { position:absolute; right:24px; font-size:9px; }
+  .landscape-match-layout .reference-score-grid {
+    grid-area:scores; display:grid; grid-template-columns:1fr 1fr; gap:8px;
+    margin:0; min-height:0; height:100%;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-width:0; min-height:0; height:100%; padding:7px 10px;
+    border-radius:13px; justify-content:center;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>small { font-size:10px; }
+  .landscape-match-layout .reference-score-grid .live-player>strong {
+    font-size:clamp(37px,5.4vw,58px); line-height:1; margin:5px 0 4px;
+  }
+  .landscape-match-layout .reference-average {
+    width:100%; padding-top:5px; margin-top:3px; gap:2px;
+  }
+  .landscape-match-layout .reference-average span { font-size:9px; }
+  .landscape-match-layout .reference-average b { font-size:clamp(18px,2.4vw,25px); }
+  .landscape-match-layout .turn-indicator { margin-top:4px; font-size:9px; }
+  .landscape-match-layout .checkout-panel {
+    grid-area:checkout; min-height:0; height:38px; margin:0; padding:4px 10px;
+    border-radius:9px; display:flex; flex-direction:row; justify-content:center; gap:12px;
+  }
+  .landscape-match-layout .checkout-panel small { font-size:9px; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(15px,2vw,21px); }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area:entry; min-height:0; height:100%; margin:0 auto; width:min(100%,560px);
+    padding:5px 8px; border-radius:12px; display:flex; flex-direction:column;
+    justify-content:flex-start; overflow:hidden;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading { margin:0; min-height:18px; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:12px; margin:0; }
+  .landscape-match-layout .entry-mode-switch { justify-content:center; gap:8px; margin:0 0 3px; min-height:24px; }
+  .landscape-match-layout .entry-mode-switch button { padding:3px 10px; font-size:10px; }
+  .landscape-match-layout .total-entry { display:flex; flex-direction:column; min-height:0; flex:1; }
+  .landscape-match-layout .total-score-display { min-height:29px; height:29px; padding:0; font-size:25px; line-height:1.1; }
+  .landscape-match-layout .number-pad {
+    width:100%; max-width:500px; margin:0 auto; flex:1 1 auto; min-height:0;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(4,minmax(0,1fr)); gap:5px;
+  }
+  .landscape-match-layout .number-pad button {
+    min-height:0; height:100%; padding:0; border-radius:8px;
+    font-size:clamp(18px,2.4vw,25px);
+  }
+  .landscape-match-layout .confirm-score {
+    flex:0 0 39px; height:39px; min-height:39px; margin:5px auto 0;
+    width:100%; max-width:500px; padding:5px; font-size:13px; border-radius:8px;
+  }
+  .landscape-match-layout .reference-entry-panel>.tiny { display:none; }
+  .landscape-match-layout .match-notice { display:none; }
+  .landscape-match-layout .info-panel,
+  .landscape-match-layout .landscape-end-match { display:none !important; }
+  .landscape-match-layout .checkout-modal-backdrop { z-index:50; }
+}
+@media (orientation:landscape) and (min-width:740px) and (max-height:620px) {
+  .landscape-match-layout {
+    grid-template-rows:32px minmax(100px,20%) 32px minmax(0,1fr);
+    gap:4px;
+  }
+  .landscape-match-layout .match-header-strip { height:32px; }
+  .landscape-match-layout .checkout-panel { height:32px; }
+  .landscape-match-layout .reference-entry-panel { padding:3px 7px; }
+  .landscape-match-layout .entry-mode-switch { min-height:20px; }
+  .landscape-match-layout .total-score-display { min-height:24px; height:24px; font-size:21px; }
+  .landscape-match-layout .confirm-score { flex-basis:34px; height:34px; min-height:34px; margin-top:3px; }
+}
+
+/* Scroll-safe landscape fallback: keep the compact Atlas layout, never trap the page */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    width:100%; height:auto !important; min-height:100% !important;
+    overflow-x:hidden !important; overflow-y:auto !important;
+  }
+  body { min-height:100dvh; }
+  .app-shell.match-active {
+    height:auto !important; min-height:100dvh !important;
+    overflow:visible !important; display:flex; flex-direction:column;
+  }
+  .match-active>main {
+    height:auto !important; min-height:0 !important;
+    overflow:visible !important; flex:0 0 auto !important;
+  }
+  .landscape-match-layout {
+    height:auto !important; min-height:0 !important; overflow:visible !important;
+    grid-template-rows:38px minmax(118px,22vh) 38px auto !important;
+    align-content:start !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    height:auto !important; min-height:330px !important;
+    overflow:visible !important; justify-content:flex-start;
+  }
+  .landscape-match-layout .total-entry { min-height:270px !important; }
+  .landscape-match-layout .number-pad { min-height:180px !important; flex:0 0 auto !important; }
+  .landscape-match-layout .number-pad button { min-height:38px !important; height:auto !important; }
+}
+
+
+/* Four-zone landscape match layout: stacked scores left, keypad right, checkout below */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    height:auto !important;
+    min-height:100% !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+  .app-shell.match-active {
+    height:auto !important;
+    min-height:100dvh !important;
+    overflow:visible !important;
+  }
+  .match-active>main {
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+  }
+  .landscape-match-layout {
+    display:grid !important;
+    width:100%;
+    height:auto !important;
+    min-height:0 !important;
+    grid-template-columns:minmax(300px,0.9fr) minmax(420px,1.1fr) !important;
+    grid-template-rows:38px minmax(340px,auto) 58px !important;
+    grid-template-areas:
+      "head head"
+      "scores entry"
+      "checkout checkout" !important;
+    gap:8px 12px !important;
+    align-content:start !important;
+    overflow:visible !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area:head !important;
+    height:38px !important;
+    min-height:38px;
+    margin:0 !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    grid-area:scores !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:repeat(2,minmax(160px,1fr)) !important;
+    gap:9px !important;
+    width:100%;
+    height:100% !important;
+    min-height:340px !important;
+    margin:0 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-width:0 !important;
+    min-height:0 !important;
+    height:100% !important;
+    padding:9px 12px !important;
+    border-radius:13px;
+    justify-content:center;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>small {
+    font-size:clamp(10px,1.2vw,13px) !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player>strong {
+    font-size:clamp(38px,5vw,62px) !important;
+    line-height:1 !important;
+    margin:7px 0 !important;
+  }
+  .landscape-match-layout .reference-average {
+    padding-top:6px !important;
+    margin-top:4px !important;
+    gap:3px !important;
+  }
+  .landscape-match-layout .reference-average span { font-size:10px !important; }
+  .landscape-match-layout .reference-average b { font-size:clamp(19px,2.2vw,27px) !important; }
+  .landscape-match-layout .turn-indicator { margin-top:5px !important; font-size:10px !important; }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area:entry !important;
+    width:100% !important;
+    max-width:none !important;
+    height:auto !important;
+    min-height:340px !important;
+    margin:0 !important;
+    padding:10px 12px !important;
+    overflow:visible !important;
+    display:flex !important;
+    flex-direction:column;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading { margin:0 0 3px !important; }
+  .landscape-match-layout .reference-entry-panel .section-heading h2 { font-size:13px !important; }
+  .landscape-match-layout .entry-mode-switch {
+    min-height:23px !important;
+    margin:0 0 4px !important;
+    gap:8px !important;
+  }
+  .landscape-match-layout .entry-mode-switch button { padding:3px 9px !important; font-size:10px !important; }
+  .landscape-match-layout .total-entry {
+    display:flex !important;
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    flex-direction:column;
+  }
+  .landscape-match-layout .total-score-display {
+    height:30px !important;
+    min-height:30px !important;
+    padding:0 !important;
+    font-size:25px !important;
+  }
+  .landscape-match-layout .number-pad {
+    width:100% !important;
+    max-width:none !important;
+    min-height:180px !important;
+    flex:1 1 auto !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(4,minmax(38px,1fr)) !important;
+    gap:6px !important;
+  }
+  .landscape-match-layout .number-pad button {
+    min-height:38px !important;
+    height:100% !important;
+    padding:0 !important;
+    font-size:clamp(19px,2.2vw,27px) !important;
+  }
+  .landscape-match-layout .confirm-score {
+    width:100% !important;
+    max-width:none !important;
+    height:39px !important;
+    min-height:39px !important;
+    flex:0 0 39px !important;
+    margin:5px 0 0 !important;
+    padding:5px !important;
+    font-size:13px !important;
+  }
+  .landscape-match-layout .reference-entry-panel>.tiny { display:none !important; }
+  .landscape-match-layout .checkout-panel {
+    grid-area:checkout !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:58px !important;
+    margin:0 !important;
+    padding:7px 10px !important;
+    display:flex !important;
+    flex-direction:row !important;
+    justify-content:center !important;
+    align-items:center !important;
+    gap:10px !important;
+  }
+  .landscape-match-layout .checkout-panel small { font-size:10px !important; }
+  .landscape-match-layout .checkout-panel strong { font-size:clamp(16px,2vw,23px) !important; }
+  .landscape-match-layout .match-notice,
+  .landscape-match-layout .info-panel,
+  .landscape-match-layout .landscape-end-match { display:none !important; }
+}
+@media (orientation:landscape) and (min-width:740px) and (max-height:620px) {
+  .landscape-match-layout {
+    grid-template-rows:32px minmax(300px,auto) 48px !important;
+    gap:5px 8px !important;
+  }
+  .landscape-match-layout .match-header-strip { height:32px !important; min-height:32px; }
+  .landscape-match-layout .reference-score-grid { min-height:300px !important; grid-template-rows:repeat(2,minmax(145px,1fr)) !important; }
+  .landscape-match-layout .reference-entry-panel { min-height:300px !important; padding:5px 7px !important; }
+  .landscape-match-layout .number-pad { min-height:160px !important; }
+  .landscape-match-layout .checkout-panel { min-height:48px !important; }
+}
+
+/* Landscape keypad: confirmation occupies the third cell beside DEL and 0 */
+@media (orientation:landscape) and (min-width:740px) {
+  .landscape-match-layout .number-pad {
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:repeat(4,minmax(38px,1fr)) !important;
+    align-content:stretch !important;
+  }
+  .landscape-match-layout .number-pad .confirm-score {
+    grid-column:auto !important;
+    grid-row:auto !important;
+    width:100% !important;
+    min-width:0 !important;
+    min-height:38px !important;
+    height:100% !important;
+    margin:0 !important;
+    padding:3px 5px !important;
+    font-size:clamp(10px,1.15vw,14px) !important;
+    line-height:1.1 !important;
+    letter-spacing:0 !important;
+    white-space:normal !important;
+  }
+  .landscape-match-layout .number-pad button[data-key="back"] {
+    font-size:clamp(12px,1.3vw,16px) !important;
+    letter-spacing:0 !important;
+  }
+}
+
+/* Huawei tablet landscape: use the spare viewport height while retaining scroll fallback */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    min-height: calc(100dvh - 92px) !important;
+    height: auto !important;
+    grid-template-rows: 50px minmax(370px, 1fr) 58px !important;
+    align-content: stretch !important;
+    gap: 9px 12px !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    height: 50px !important;
+    min-height: 50px !important;
+    padding: 5px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .landscape-match-layout .match-header-strip strong {
+    font-size: clamp(19px, 2.4vw, 26px) !important;
+    line-height: 1.1 !important;
+  }
+  .landscape-match-layout .match-header-strip small {
+    display: block !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    margin-top: 3px !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    min-height: 370px !important;
+    grid-template-rows: repeat(2, minmax(180px, 1fr)) !important;
+    height: 100% !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    padding: 12px 14px !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    font-size: clamp(46px, 5.6vw, 72px) !important;
+    margin: 10px 0 !important;
+  }
+  .landscape-match-layout .reference-average b {
+    font-size: clamp(22px, 2.7vw, 32px) !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    min-height: 370px !important;
+    height: 100% !important;
+    padding: 12px 14px !important;
+  }
+  .landscape-match-layout .number-pad {
+    min-height: 210px !important;
+    grid-template-rows: repeat(4, minmax(46px, 1fr)) !important;
+    gap: 7px !important;
+  }
+  .landscape-match-layout .number-pad button {
+    min-height: 46px !important;
+    font-size: clamp(21px, 2.5vw, 30px) !important;
+  }
+  .landscape-match-layout .number-pad .confirm-score {
+    min-height: 46px !important;
+    font-size: clamp(11px, 1.25vw, 15px) !important;
+  }
+  /* Checkout remains the same compact full-width strip */
+  .landscape-match-layout .checkout-panel {
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+  }
+}
+
+
+/* Final Darts Bot brand correction: charcoal, black, white and restrained gold */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    /* A little more breathing room below the match/legs header */
+    grid-template-rows: 54px minmax(370px, 1fr) 58px !important;
+    row-gap: 12px !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    background: #17191c !important;
+    border: 1px solid #303238 !important;
+    margin: 0 0 2px !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player,
+  .landscape-match-layout .reference-entry-panel {
+    background: #17191c !important;
+    color: #f4f4f2 !important;
+    border: 1px solid #303238 !important;
+    box-shadow: none !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player.active,
+  .landscape-match-layout .reference-score-grid .live-player.is-active,
+  .landscape-match-layout .reference-score-grid .live-player[aria-current="true"] {
+    border: 2px solid #d5ad4a !important;
+  }
+  .landscape-match-layout .number-pad button {
+    background: #303438 !important;
+    border: 1px solid #41444a !important;
+    color: #f4f4f2 !important;
+    box-shadow: none !important;
+  }
+  .landscape-match-layout .number-pad button:active {
+    background: #41444a !important;
+    border-color: #d5ad4a !important;
+  }
+  .landscape-match-layout .number-pad button.confirm-score,
+  .landscape-match-layout .number-pad .confirm-score {
+    background: #d5ad4a !important;
+    border: 1px solid #d5ad4a !important;
+    color: #151515 !important;
+  }
+  .landscape-match-layout .number-pad button[data-key="back"] {
+    background: #303438 !important;
+    color: #f4f4f2 !important;
+  }
+  .landscape-match-layout .checkout-panel {
+    background: #202226 !important;
+    color: #f4f4f2 !important;
+    border: 1px solid #303238 !important;
+  }
+  .landscape-match-layout .checkout-panel small,
+  .landscape-match-layout .checkout-panel .checkout-label {
+    color: #d5ad4a !important;
+  }
+  .landscape-match-layout .checkout-panel strong {
+    color: #f4f4f2 !important;
+  }
+  .landscape-match-layout .match-header-strip strong,
+  .landscape-match-layout .reference-score-grid .live-player > strong,
+  .landscape-match-layout .reference-average b,
+  .landscape-match-layout .total-score-display {
+    color: #f4f4f2 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player.active > strong,
+  .landscape-match-layout .reference-score-grid .live-player.is-active > strong {
+    color: #d5ad4a !important;
+  }
+}
+
+
+/* Targeted Huawei landscape refinements — preserve the approved charcoal/gold layout */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    height: calc(100dvh - 112px) !important;
+    min-height: 0 !important;
+    grid-template-rows: 44px minmax(0, 1fr) 52px !important;
+    gap: 7px 10px !important;
+    overflow: hidden !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    height: 44px !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    min-height: 0 !important;
+    height: 100% !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-height: 0 !important;
+    padding: 8px 12px !important;
+    justify-content: center !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    font-size: clamp(40px, 5vw, 64px) !important;
+    margin: 7px 0 !important;
+  }
+  .landscape-match-layout .reference-average {
+    display: grid !important;
+    grid-template-columns: 1fr 1px 1fr !important;
+    align-items: center !important;
+    width: 100% !important;
+    border-top: 1px solid #505457 !important;
+    padding-top: 8px !important;
+    margin-top: 5px !important;
+    gap: 0 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+  }
+  .landscape-match-layout .reference-average .average-metric span {
+    color: #b4b5b8 !important;
+    font-size: clamp(11px, 1.15vw, 14px) !important;
+    font-weight: 600 !important;
+    letter-spacing: .02em !important;
+  }
+  .landscape-match-layout .reference-average .average-metric b {
+    font-size: clamp(19px, 2.15vw, 27px) !important;
+    line-height: 1.05 !important;
+  }
+  .landscape-match-layout .reference-average > i {
+    display: block !important;
+    width: 1px !important;
+    height: 32px !important;
+    background: #505457 !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 8px 11px !important;
+    overflow: hidden !important;
+  }
+  .landscape-match-layout .reference-entry-panel .section-heading {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 22px !important;
+    margin: 0 0 2px !important;
+  }
+  .landscape-match-layout .score-undo-icon {
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 28px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #9b9da3 !important;
+    font-size: 23px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+  }
+  .landscape-match-layout .score-undo-icon:hover,
+  .landscape-match-layout .score-undo-icon:focus,
+  .landscape-match-layout .score-undo-icon:active {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #d5ad4a !important;
+    outline: none !important;
+  }
+  .landscape-match-layout .number-pad button[data-key="back"],
+  .landscape-match-layout .number-pad button.confirm-score {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: clamp(12px, 1.25vw, 15px) !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0 !important;
+  }
+  .landscape-match-layout .checkout-panel {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin: 0 !important;
+  }
+}
+@media (orientation: landscape) and (min-width: 740px) and (max-height: 620px) {
+  .landscape-match-layout {
+    height: calc(100dvh - 104px) !important;
+    grid-template-rows: 38px minmax(0, 1fr) 44px !important;
+    gap: 5px 8px !important;
+  }
+  .landscape-match-layout .match-header-strip { height: 38px !important; min-height: 38px !important; }
+  .landscape-match-layout .checkout-panel { height: 44px !important; min-height: 44px !important; max-height: 44px !important; }
+  .landscape-match-layout .reference-score-grid .live-player > strong { font-size: clamp(34px, 4.4vw, 52px) !important; }
+  .landscape-match-layout .reference-average .average-metric span { font-size: 10px !important; }
+  .landscape-match-layout .reference-average .average-metric b { font-size: clamp(17px, 1.9vw, 23px) !important; }
+}
+
+/* Cautious landscape spacing correction: keep the legs subtitle clear and use a little more tablet height. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    grid-template-rows: 62px minmax(382px, 1fr) 58px !important;
+    row-gap: 10px !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    height: 62px !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 7px 12px !important;
+    overflow: visible !important;
+  }
+  .landscape-match-layout .match-header-strip > div {
+    gap: 4px !important;
+  }
+  .landscape-match-layout .match-header-strip strong {
+    line-height: 1.05 !important;
+  }
+  .landscape-match-layout .match-header-strip small {
+    display: block !important;
+    line-height: 1.25 !important;
+    margin-top: 2px !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    min-height: 382px !important;
+    grid-template-rows: repeat(2, minmax(185px, 1fr)) !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    min-height: 382px !important;
+  }
+  /* Keep checkout strip exactly the same height and visual treatment. */
+  .landscape-match-layout .checkout-panel {
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+  }
+}
+
+
+/* First-nine metrics and larger remaining scores — landscape tablet only. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    font-size: clamp(44px, 5.8vw, 68px) !important;
+  }
+  .landscape-match-layout .reference-average {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    padding-top: 5px !important;
+    margin-top: 4px !important;
+    gap: 0 !important;
+    border-top: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average > i { display: none !important; }
+  .landscape-match-layout .reference-average .average-metric {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    gap: 1px !important;
+    padding: 3px 2px !important;
+  }
+  .landscape-match-layout .reference-average .average-metric:nth-child(odd) {
+    border-right: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric:nth-child(-n+2) {
+    border-bottom: 1px solid #505457 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric span {
+    font-size: clamp(9px, .95vw, 11px) !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+  .landscape-match-layout .reference-average .average-metric b {
+    font-size: clamp(15px, 1.65vw, 20px) !important;
+    line-height: 1.05 !important;
+  }
+}
+
+
+/* Latest approved Huawei landscape refinement: remove redundant turn labels,
+   balance the four averages, and restore the gold active-player outline. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .reference-score-grid .live-player {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-evenly !important;
+    padding: 12px 8px !important;
+    border: 1px solid #303438 !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player.is-throwing,
+  .landscape-match-layout .reference-score-grid .live-player.is-active {
+    border: 2px solid #d5ad4a !important;
+    box-shadow: 0 0 0 1px rgba(213,173,74,.12) !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    margin: 8px 0 10px !important;
+  }
+  .landscape-match-layout .reference-average {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    margin-top: 2px !important;
+    padding-top: 3px !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .landscape-match-layout .reference-average .average-metric {
+    min-height: 0 !important;
+    padding: 4px 2px !important;
+  }
+  .landscape-match-layout .turn-indicator {
+    display: none !important;
+  }
+}
+
+
+
+/* Final landscape match-screen correction:
+   restore the checkout strip and use the available tablet viewport without clipping. */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .app-shell.match-active {
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    padding: 5px 12px 7px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .match-active > main {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .landscape-match-layout {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr) !important;
+    grid-template-rows: 46px minmax(0, 1fr) 52px !important;
+    grid-template-areas: "head head" "scores entry" "checkout checkout" !important;
+    gap: 8px 10px !important;
+    align-content: stretch !important;
+    overflow: visible !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    grid-area: head !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+  }
+  .landscape-match-layout .reference-score-grid {
+    grid-area: scores !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    gap: 9px !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 10px !important;
+    justify-content: space-evenly !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    margin: 8px 0 10px !important;
+    font-size: clamp(44px, 5.8vw, 68px) !important;
+  }
+  .landscape-match-layout .reference-average {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    margin-top: 5px !important;
+    padding-top: 5px !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .landscape-match-layout .reference-average .average-metric {
+    min-height: 0 !important;
+    padding: 5px 3px !important;
+    gap: 3px !important;
+  }
+  .landscape-match-layout .reference-average .average-metric span {
+    font-size: clamp(10px, 1vw, 12px) !important;
+    line-height: 1.2 !important;
+  }
+  .landscape-match-layout .reference-average .average-metric b {
+    font-size: clamp(16px, 1.8vw, 22px) !important;
+    line-height: 1.1 !important;
+  }
+  .landscape-match-layout .reference-entry-panel {
+    grid-area: entry !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+  .landscape-match-layout .checkout-panel {
+    grid-area: checkout !important;
+    display: flex !important;
+    visibility: visible !important;
+    width: 100% !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+}
+@media (orientation: landscape) and (min-width: 740px) and (max-height: 620px) {
+  .landscape-match-layout {
+    grid-template-rows: 40px minmax(0, 1fr) 46px !important;
+    gap: 6px 8px !important;
+  }
+  .landscape-match-layout .match-header-strip {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+  .landscape-match-layout .checkout-panel {
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+  }
+  .landscape-match-layout .reference-score-grid .live-player > strong {
+    margin: 5px 0 7px !important;
+  }
+  .landscape-match-layout .reference-average .average-metric {
+    padding: 3px 2px !important;
+    gap: 2px !important;
+  }
+}
+
+
+
+/* Alignment refinement: score stack and entry panel share identical top/bottom edges. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout {
+    box-sizing: border-box !important;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr) !important;
+    grid-template-rows: 46px minmax(0, 1fr) 52px !important;
+    grid-template-areas:
+      "head head"
+      "scores entry"
+      "checkout checkout" !important;
+    column-gap: 10px !important;
+    row-gap: 8px !important;
+    align-items: stretch !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid,
+  .landscape-match-layout > .reference-entry-panel {
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid {
+    grid-area: scores !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel {
+    grid-area: entry !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    padding: 10px 12px !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel .section-heading {
+    flex: 0 0 auto !important;
+    margin: 0 0 5px !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel .entry-mode-switch {
+    flex: 0 0 auto !important;
+    margin: 4px 0 5px !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel .total-entry,
+  .landscape-match-layout > .reference-entry-panel .dart-entry {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel .number-pad {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .landscape-match-layout > .reference-entry-panel .number-pad button {
+    min-height: 0 !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .landscape-match-layout > .checkout-panel {
+    grid-area: checkout !important;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+
+
+/* Scroll safety override:
+   keep the landscape layout compact, but never trap the page in a non-scrollable viewport. */
+@media (orientation: landscape) and (min-width: 740px) {
+  html, body, #app {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  body {
+    position: relative !important;
+  }
+
+  .app-shell.match-active {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+  }
+
+  .match-active > main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .landscape-match-layout {
+    height: auto !important;
+    min-height: min(660px, calc(100dvh - 110px)) !important;
+    grid-template-rows: 46px minmax(390px, 1fr) 52px !important;
+    overflow: visible !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid,
+  .landscape-match-layout > .reference-entry-panel {
+    height: 100% !important;
+    min-height: 390px !important;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 740px) and (max-height: 620px) {
+  .landscape-match-layout {
+    min-height: 500px !important;
+    grid-template-rows: 40px minmax(360px, 1fr) 46px !important;
+  }
+
+  .landscape-match-layout > .reference-score-grid,
+  .landscape-match-layout > .reference-entry-panel {
+    min-height: 360px !important;
+  }
+}
+
+/* Match header: three aligned items on one line; per-player visit counters. */
+@media (orientation: landscape) and (min-width: 740px) {
+  .landscape-match-layout .match-header-strip {
+    display:grid !important;
+    grid-template-columns:1fr auto 1fr !important;
+    align-items:center !important;
+    justify-content:initial !important;
+    text-align:center !important;
+    position:relative !important;
+  }
+  .landscape-match-layout .match-header-strip > div {
+    grid-column:2 !important;
+    grid-row:1 !important;
+    margin:0 !important;
+    display:block !important;
+  }
+  .landscape-match-layout .match-header-strip strong,
+  .landscape-match-layout .match-header-strip .best-of-label,
+  .landscape-match-layout .match-header-strip .leg-count-label {
+    font-size:clamp(16px,2.0vw,22px) !important;
+    line-height:1 !important;
+    font-weight:800 !important;
+    letter-spacing:.015em !important;
+    color:#f3f3f1 !important;
+    white-space:nowrap !important;
+  }
+  .landscape-match-layout .match-header-strip .best-of-label {
+    grid-column:1 !important;
+    grid-row:1 !important;
+    justify-self:start !important;
+    position:static !important;
+    color:var(--muted) !important;
+  }
+  .landscape-match-layout .match-header-strip .leg-count-label {
+    grid-column:3 !important;
+    grid-row:1 !important;
+    justify-self:end !important;
+    position:static !important;
+    color:var(--muted) !important;
+  }
+  .landscape-match-layout .match-header-strip small { display:none !important; }
+  .landscape-match-layout .live-player-heading {
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:18px;
+  }
+  .landscape-match-layout .reference-score-grid .live-player-heading > small {
+    font-size:10px !important;
+    font-weight:800;
+    color:var(--gold);
+    letter-spacing:.06em;
+  }
+  .landscape-match-layout .visit-counter {
+    color:var(--muted);
+    font-size:10px;
+    line-height:1;
+    font-weight:700;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+}
