@@ -43,6 +43,24 @@ export function applyVisit(leg, darts) {
   return { ...leg, remaining: after, dartsThrown: leg.dartsThrown + countedDarts, pointsScored: leg.pointsScored + pointsForVisit,
     visits: [...leg.visits, visit], finished: !isBust && checkout, busted: isBust, opened };
 }
+/** Applies a visit entered as a total rather than three individually recorded darts.
+ * Total-entry mode cannot infer dart order, so checkout attempts must use dart mode.
+ */
+export function applyTotalVisit(leg, total) {
+  if (leg.finished) throw new Error("This leg has already finished.");
+  if (!Number.isInteger(total) || total < 0 || total > 180) throw new Error("Visit total must be an integer from 0 to 180.");
+  const before = leg.remaining;
+  if (total >= before) throw new Error("Use individual darts to record a checkout.");
+  const remaining = before - total;
+  const bustReason = remaining === 1 ? "leave_one" : null;
+  const bust = Boolean(bustReason);
+  const visit = { before, after: bust ? before : remaining, darts: [], dartsThrown: 3,
+    pointsScored: bust ? 0 : total, rawPoints: total, bust, bustReason, checkout: false, totalEntry: true };
+  return { ...leg, remaining: visit.after, dartsThrown: leg.dartsThrown + 3,
+    pointsScored: leg.pointsScored + visit.pointsScored, visits: [...leg.visits, visit],
+    finished: false, busted: bust };
+}
+
 export function undoVisit(leg) {
   if (!leg.visits.length) return leg;
   const visits = leg.visits.slice(0, -1), dartsThrown = visits.reduce((n,v)=>n+v.dartsThrown,0), pointsScored = visits.reduce((n,v)=>n+v.pointsScored,0), last = visits.at(-1);
