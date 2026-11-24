@@ -192,7 +192,16 @@ function startMatch() {
   state.undoStack=[];state.notice="Match started. You're throwing first.";
   setPage("match");
 }
-function saveUndoSnapshot() { state.undoStack.push(structuredClone(state.match)); if(state.undoStack.length>30)state.undoStack.shift(); }
+function cloneMatchState(match) {
+  // Match state contains plain data only. JSON cloning also works in older
+  // Android browsers where structuredClone may not be implemented.
+  return JSON.parse(JSON.stringify(match));
+}
+function saveUndoSnapshot() {
+  if (!state.match) throw new Error("There is no active match to save.");
+  state.undoStack.push(cloneMatchState(state.match));
+  if (state.undoStack.length > 30) state.undoStack.shift();
+}
 function finishLeg(winner) {
   const l=state.match.currentLeg;
   if(winner==="player")state.match.playerLegs++;else state.match.botLegs++;
