@@ -139,8 +139,8 @@ function currentMatchMarkup() {
   const botMatchAvg=(completedBotDarts+leg.botDarts)?((completedBotPoints+leg.botPoints)/(completedBotDarts+leg.botDarts))*3:0;
   const playerMatchFirstNine=pooledFirstNine(m.completedLegs,leg.player.visits,"player");
   const botMatchFirstNine=pooledFirstNine(m.completedLegs,leg.botVisits,"bot");
-  const lastPlayer=leg.playerVisits.at(-1);
-  const lastBot=leg.botVisits.at(-1);
+  const lastPlayer=leg.playerVisits[leg.playerVisits.length - 1];
+  const lastBot=leg.botVisits[leg.botVisits.length - 1];
   const checkout=checkoutSuggestion(leg.player.remaining);
   const modeToggle=`<div class="entry-mode-switch"><button class="${state.entryMode==="total"?"active":""}" data-mode="total">Total score</button><button class="${state.entryMode==="darts"?"active":""}" data-mode="darts">Individual darts</button></div>`;
   const totalEntry=`<div class="total-entry"><div class="total-score-display">${state.scoreInput||"0"}</div><div class="number-pad">${["1","2","3","4","5","6","7","8","9","back","0"].map(k=>`<button data-key="${k}">${k==="back"?"DEL":k}</button>`).join("")}<button class="primary-button confirm-score" data-action="confirm-total">CONFIRM SCORE</button></div></div>`;
@@ -228,7 +228,7 @@ function finishLeg(winner) {
 function scoreDarts(darts) {
   const l=state.match.currentLeg;
   l.player=applyVisit(l.player,darts);
-  const visit=l.player.visits.at(-1);
+  const visit=l.player.visits[l.player.visits.length - 1];
   l.playerVisits.push(visit);
   if(visit.bust)state.notice=`Bust — your score stays at ${visit.before}.`;
   else if(visit.checkout){state.notice="Leg won!";finishLeg("player");return;}
@@ -276,7 +276,7 @@ function submitTotalVisit() {
     saveUndoSnapshot();
     const l=state.match.currentLeg;
     l.player=applyTotalVisit(l.player,total);
-    const visit=l.player.visits.at(-1);
+    const visit=l.player.visits[l.player.visits.length - 1];
     l.playerVisits.push(visit);
     state.scoreInput="";
     if(visit.bust) state.notice=`Bust — your score stays at ${visit.before}.`;
