@@ -63,7 +63,7 @@ export function applyTotalVisit(leg, total) {
 
 export function undoVisit(leg) {
   if (!leg.visits.length) return leg;
-  const visits = leg.visits.slice(0, -1), dartsThrown = visits.reduce((n,v)=>n+v.dartsThrown,0), pointsScored = visits.reduce((n,v)=>n+v.pointsScored,0), last = visits.at(-1);
+  const visits = leg.visits.slice(0, -1), dartsThrown = visits.reduce((n,v)=>n+v.dartsThrown,0), pointsScored = visits.reduce((n,v)=>n+v.pointsScored,0), last = visits.length ? visits[visits.length - 1] : null;
   return { ...leg, remaining: last ? last.after : leg.startingScore, dartsThrown, pointsScored, visits, finished: Boolean(last?.checkout),
     busted: Boolean(last?.bust), opened: leg.doubleIn ? visits.some(v=>v.darts.some(d=>d.isDouble||d.isBull)) : true };
 }
@@ -91,7 +91,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function pickWeighted(items,rng) {
   let n=rng(), sum=0;
   for(const item of items){sum+=item.p;if(n<=sum)return item.value;}
-  return items.at(-1).value;
+  return items[items.length - 1].value;
 }
 function throwAt20(level,rng,p=LEVEL_AIM[level]) {
   const outcome=pickWeighted([
@@ -216,5 +216,5 @@ export function createMatch({game=501,legsToWin=3,opponent={type:"standard",leve
   if(![301,501].includes(game))throw new Error("Game must be 301 or 501.");
   if(!Number.isInteger(legsToWin)||legsToWin<1)throw new Error("legsToWin must be a positive integer.");
   if(opponent.type==="standard"&&!BOT_LEVELS[opponent.level])throw new Error("Invalid bot level.");
-  return {game,legsToWin,opponent:structuredClone(opponent),status:"in_progress",currentLeg:createLeg(game,{doubleOut:true}),playerLegs:0,botLegs:0,completedLegs:[]};
+  return {game,legsToWin,opponent:JSON.parse(JSON.stringify(opponent)),status:"in_progress",currentLeg:createLeg(game,{doubleOut:true}),playerLegs:0,botLegs:0,completedLegs:[]};
 }

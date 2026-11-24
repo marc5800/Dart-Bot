@@ -117,3 +117,30 @@ test("total-score entry busts when it leaves one", () => {
   assert.equal(leg.visits[0].bust, true);
   assert.equal(leg.visits[0].pointsScored, 0);
 });
+
+
+test("legacy Android browser compatibility: total entry, undo and bot visit work without Array.at", () => {
+  const originalAt = Array.prototype.at;
+  try {
+    Array.prototype.at = undefined;
+    let leg = createLeg(501);
+    leg = applyTotalVisit(leg, 100);
+    assert.equal(leg.remaining, 401);
+    leg = applyTotalVisit(leg, 100);
+    assert.equal(leg.remaining, 301);
+    const undone = undoVisit(leg);
+    assert.equal(undone.remaining, 401);
+    const bot = generateBotVisit({ level: 3, remaining: 277, rng: () => 0.5 });
+    assert.ok(bot.darts.length > 0);
+  } finally {
+    Array.prototype.at = originalAt;
+  }
+});
+
+test("application source does not rely on Array.at for tablet browser compatibility", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const main = await readFile(new URL("./main.js", import.meta.url), "utf8");
+  const engine = await readFile(new URL("./engine.js", import.meta.url), "utf8");
+  assert.equal(main.includes(".at("), false);
+  assert.equal(engine.includes(".at("), false);
+});
