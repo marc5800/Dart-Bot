@@ -1,5 +1,5 @@
 import {
-  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit,
+  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit, checkoutRoute,
   summariseLeg, threeDartAverage, firstNineAverage
 } from "./engine.js";
 
