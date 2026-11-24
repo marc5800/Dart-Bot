@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, undoVisit, threeDartAverage,
-  summariseLeg, generateBotVisit, createMatch
+  summariseLeg, generateBotVisit, createMatch, checkoutRoute
 } from "./engine.js";
 
 test("official bot level bands and checkout defaults", () => {
@@ -143,4 +143,26 @@ test("application source does not rely on Array.at for tablet browser compatibil
   const engine = await readFile(new URL("./engine.js", import.meta.url), "utf8");
   assert.equal(main.includes(".at("), false);
   assert.equal(engine.includes(".at("), false);
+});
+
+
+test("checkout suggestions support 170 and reject scores outside the checkout range", () => {
+  const route = checkoutRoute(170);
+  assert.ok(Array.isArray(route));
+  assert.equal(route.reduce((sum, dart) => sum + dart.score, 0), 170);
+  assert.ok(route.length >= 1 && route.length <= 3);
+  assert.ok(route[route.length - 1].isDouble);
+  assert.equal(checkoutRoute(171), null);
+  assert.equal(checkoutRoute(1), null);
+  assert.equal(checkoutRoute(0), null);
+});
+
+test("total-score entry can move from 221 to 170 without a bust", () => {
+  const fromFifty = applyTotalVisit({ ...createLeg(501), remaining: 221 }, 50);
+  const fromFiftyOne = applyTotalVisit({ ...createLeg(501), remaining: 221 }, 51);
+  const fromFiftyTwo = applyTotalVisit({ ...createLeg(501), remaining: 221 }, 52);
+  assert.equal(fromFifty.remaining, 171);
+  assert.equal(fromFiftyOne.remaining, 170);
+  assert.equal(fromFiftyTwo.remaining, 169);
+  assert.equal(fromFiftyOne.visits[0].bust, false);
 });

@@ -1,6 +1,6 @@
 import {
   BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit,
-  summariseLeg, threeDartAverage, firstNineAverage
+  summariseLeg, threeDartAverage, firstNineAverage, checkoutRoute
 } from "./engine.js";
 
 const app = document.querySelector("#app");

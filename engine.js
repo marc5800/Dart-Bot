@@ -129,6 +129,12 @@ function legalCheckoutRoutes(target) {
   CHECKOUT_CACHE.set(target,routes);
   return routes;
 }
+export function checkoutRoute(target) {
+  const routes = legalCheckoutRoutes(target);
+  if (!routes.length) return null;
+  // The route list is ordered from the shortest available finish to longer routes.
+  return routes[0].map(dart => ({ ...dart }));
+}
 function chooseCheckoutRoute(target,level,rng,p=LEVEL_AIM[level]) {
   const routes=legalCheckoutRoutes(target);
   if(!routes.length)return null;
