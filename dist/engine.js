@@ -129,11 +129,10 @@ function legalCheckoutRoutes(target) {
   CHECKOUT_CACHE.set(target,routes);
   return routes;
 }
-/** Returns a legal checkout route for the on-screen suggestion. */
+/** Returns a legal checkout route for the display, or null when none exists. */
 export function checkoutRoute(target) {
   const routes = legalCheckoutRoutes(target);
-  if (!routes.length) return null;
-  return routes.slice().sort((a, b) => a.length - b.length)[0];
+  return routes.length ? routes[0].map(dart => ({ ...dart })) : null;
 }
 
 function chooseCheckoutRoute(target,level,rng,p=LEVEL_AIM[level]) {
