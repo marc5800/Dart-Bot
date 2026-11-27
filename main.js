@@ -4,7 +4,12 @@ import {
 } from "./engine.js";
 
 const app = document.querySelector("#app");
+const API_BASE = "https://darts-bot-api.marcb1986.workers.dev";
 const state = {
+  apiToken: sessionStorage.getItem("dartsbot_api_token") || "",
+  apiReady: false,
+  apiError: "",
+  saveStatus: "",
   page: "dashboard", opponent: "standard", level: 3, game: 501, legs: 5,
   match: null, undoStack: [], notice: "", lastTurn: null, entryMode: "total", scoreInput: "", checkoutModal: false, checkoutDarts: 3, checkoutAttempts: 1, dartSelections: [],
 };
@@ -21,6 +26,72 @@ const dartOptions = [
   ...Array.from({length:20}, (_,i)=>`T${i+1}`),
   "25", "BULL", "MISS"
 ];
+
+async function apiRequest(path, options = {}, token = state.apiToken) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `API request failed (${response.status}).`);
+  return data;
+}
+
+async function connectApi(token) {
+  state.apiError = "";
+  try {
+    await apiRequest("/api/matches", { method: "GET" }, token);
+    state.apiToken = token;
+    sessionStorage.setItem("dartsbot_api_token", token);
+    state.apiReady = true;
+    render();
+  } catch (error) {
+    state.apiReady = false;
+    state.apiError = error.message.includes("Unauthorised")
+      ? "That token was not accepted. Check the API_TOKEN secret in Cloudflare."
+      : error.message;
+    render();
+  }
+}
+
+function authPage() {
+  return `<div class="app-shell"><main><section class="page-intro"><p class="eyebrow">PRIVATE PLAYER ACCESS</p><h1>Darts <span>Bot</span></h1><p class="muted">Enter your private API token to connect to your match records.</p></section><section class="info-panel" style="max-width:520px;margin:24px auto"><label for="api-token" style="display:block;margin-bottom:10px">Cloudflare API token</label><input id="api-token" type="password" autocomplete="off" placeholder="Paste your API token" style="width:100%;padding:14px;border-radius:10px;border:1px solid #555;background:#171717;color:#fff"><button class="primary-button full-width" data-action="connect-api" style="margin-top:14px">Connect to my records</button>${state.apiError ? `<p class="match-notice">${state.apiError}</p>` : ""}<p class="tiny muted">The token is kept only for this browser tab session. It is not included in the published website code. Never share it.</p></section></main></div>`;
+}
+
+async function saveCompletedMatch() {
+  const m = state.match;
+  if (!m || m.status !== "complete" || m.savedToDatabase || !state.apiReady) return;
+  const legs = m.completedLegs.map((leg, i) => ({
+    ...leg,
+    playerFirstNineAverage: leg.playerFirstNineDarts ? leg.playerFirstNinePoints / leg.playerFirstNineDarts * 3 : 0,
+    botFirstNineAverage: leg.botFirstNineDarts ? leg.botFirstNinePoints / leg.botFirstNineDarts * 3 : 0
+  }));
+  const payload = {
+    id: m.id,
+    playedAt: m.playedAt,
+    game: m.game,
+    bestOf: m.bestOf,
+    playerLegs: m.playerLegs,
+    botLegs: m.botLegs,
+    opponent: m.opponent,
+    dartSetupSnapshot: m.dartSetupSnapshot || null,
+    legs
+  };
+  state.saveStatus = "Saving match to your records…";
+  render();
+  try {
+    await apiRequest("/api/matches", { method: "POST", body: JSON.stringify(payload) });
+    state.match.savedToDatabase = true;
+    state.saveStatus = "Match saved to your records.";
+  } catch (error) {
+    state.saveStatus = `Match not saved: ${error.message}`;
+  }
+  render();
+}
 
 function setPage(page) { state.page = page; render(); }
 function metric(value,label) { return `<article class="metric"><span class="metric-symbol">✦</span><strong>${value}</strong><small>${label}</small></article>`; }
@@ -169,6 +240,7 @@ function matchSummary() {
   return `<section class="page-intro"><p class="eyebrow">MATCH COMPLETE</p><h1>${m.playerLegs>m.botLegs?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponentName()} · Best of ${m.bestOf}</p></section>
   <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${m.playerLegs>m.botLegs?"Great work. Match victory secured.":"Good game. Your next challenge awaits."}</p></div>
   <section class="info-panel"><h2>Leg results</h2>${m.completedLegs.map((l,i)=>`<div class="visit-row"><span>Leg ${i+1}</span><b>${l.winner==="player"?"You":"Bot"}</b><small>${l.playerScore} – ${l.botScore}</small></div>`).join("")}</section>
+  <section class="info-panel" aria-live="polite"><h2>Match record</h2><p class="muted">${state.saveStatus || (m.savedToDatabase ? "Match saved to your records." : "Saving match to your records…")}</p>${!m.savedToDatabase && state.saveStatus.startsWith("Match not saved:") ? `<button class="secondary-button full-width" data-action="retry-save">Retry saving match</button>` : ""}</section>
   <button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
 }
 
@@ -184,6 +256,8 @@ function makeNewLeg() {
 }
 function startMatch() {
   state.match={
+    id: `match_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    playedAt: new Date().toISOString(),
     game:state.game,bestOf:state.legs,legsToWin:Math.ceil(state.legs/2),
     opponent:{type:state.opponent,level:state.level},
     playerLegs:0,botLegs:0,completedLegs:[],currentLeg:null,status:"in_progress"
@@ -216,10 +290,13 @@ function finishLeg(winner) {
     playerFirstNineDarts:firstNineTotals(l.player.visits).darts,
     playerFirstNinePoints:firstNineTotals(l.player.visits).points,
     botFirstNineDarts:firstNineTotals(l.botVisits).darts,
-    botFirstNinePoints:firstNineTotals(l.botVisits).points
+    botFirstNinePoints:firstNineTotals(l.botVisits).points,
+    playerVisits: JSON.parse(JSON.stringify(l.playerVisits)),
+    botVisits: JSON.parse(JSON.stringify(l.botVisits))
   });
   if(state.match.playerLegs>=state.match.legsToWin||state.match.botLegs>=state.match.legsToWin){
     state.match.status="complete";state.match.currentLeg=null;state.notice="";
+    saveCompletedMatch();
   } else {
     state.match.currentLeg=makeNewLeg();
     state.notice=`${winner==="player"?"You won":"Bot won"} the leg. Leg ${state.match.completedLegs.length+1} — you're throwing first.`;
@@ -300,6 +377,15 @@ function undoRound() {
 }
 
 function render() {
+  if (!state.apiReady) {
+    app.innerHTML = authPage();
+    app.querySelector('[data-action="connect-api"]')?.addEventListener("click", () => {
+      const token = app.querySelector("#api-token")?.value.trim();
+      if (!token) { state.apiError = "Enter your API token to continue."; render(); return; }
+      connectApi(token);
+    });
+    return;
+  }
   let content;
   if(state.page==="dashboard")content=dashboard();
   else if(state.page==="play")content=playSetup();
@@ -314,6 +400,7 @@ function render() {
   app.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>{
     const a=el.dataset.action;
     if(a==="start-match")startMatch();
+    else if(a==="retry-save")saveCompletedMatch();
     else if(a==="submit-visit")submitPlayerVisit();
     else if(a==="confirm-total")submitTotalVisit();
     else if(a==="record-checkout")recordManualCheckout();
@@ -349,4 +436,5 @@ function render() {
   app.querySelectorAll("[data-game]").forEach(el=>el.addEventListener("click",()=>{state.game=Number(el.dataset.game);render();}));
   app.querySelectorAll("[data-legs]").forEach(el=>el.addEventListener("click",()=>{state.legs=Number(el.dataset.legs);render();}));
 }
-render();
+if (state.apiToken) connectApi(state.apiToken);
+else render();
