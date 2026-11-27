@@ -1,5 +1,5 @@
 import {
-  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit, checkoutRoute,
+  BOT_LEVELS, createLeg, applyVisit, applyTotalVisit, generateBotVisit,
   summariseLeg, threeDartAverage, firstNineAverage
 } from "./engine.js";
 
@@ -23,6 +23,72 @@ const dartOptions = [
 ];
 
 function setPage(page) { state.page = page; render(); }
+
+const API_BASE = "https://darts-bot-api.marcb1986.workers.dev";
+const API_TOKEN_SESSION_KEY = "dartsBotApiToken";
+
+function getApiToken() {
+  let token = sessionStorage.getItem(API_TOKEN_SESSION_KEY) || "";
+  if (!token) {
+    token = window.prompt("Enter your private Darts Bot API token. It stays in this browser tab session and is not saved to GitHub.");
+    if (!token) return "";
+    token = token.trim();
+    if (!token) return "";
+    sessionStorage.setItem(API_TOKEN_SESSION_KEY, token);
+  }
+  return token;
+}
+
+async function saveCompletedMatch(match) {
+  if (!match || match.status !== "complete" || match.saveStatus === "saved" || match.saveStatus === "saving") return;
+  const token = getApiToken();
+  if (!token) {
+    match.saveStatus = "not_saved";
+    match.saveError = "No API token entered. You can retry saving below.";
+    if (state.match === match) render();
+    return;
+  }
+
+  match.saveStatus = "saving";
+  match.saveError = "";
+  if (state.match === match) render();
+
+  const payload = {
+    id: match.id,
+    playedAt: match.playedAt,
+    game: match.game,
+    bestOf: match.bestOf,
+    playerLegs: match.playerLegs,
+    botLegs: match.botLegs,
+    opponent: match.opponent,
+    dartSetupSnapshot: match.dartSetupSnapshot || null,
+    legs: match.completedLegs
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}/api/matches`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      if (response.status === 401) {
+        sessionStorage.removeItem(API_TOKEN_SESSION_KEY);
+      }
+      throw new Error(result.error || `Save failed (${response.status}).`);
+    }
+    match.saveStatus = "saved";
+    match.saveError = "";
+  } catch (error) {
+    match.saveStatus = "error";
+    match.saveError = error.message || "Could not save match.";
+  }
+  if (state.match === match) render();
+}
 function metric(value,label) { return `<article class="metric"><span class="metric-symbol">✦</span><strong>${value}</strong><small>${label}</small></article>`; }
 function feature(icon,title,desc,page) { return `<button class="feature-card" data-action="${page}"><span>${icon}</span><b>${title}</b><small>${desc}</small></button>`; }
 
@@ -169,6 +235,10 @@ function matchSummary() {
   return `<section class="page-intro"><p class="eyebrow">MATCH COMPLETE</p><h1>${m.playerLegs>m.botLegs?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponentName()} · Best of ${m.bestOf}</p></section>
   <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${m.playerLegs>m.botLegs?"Great work. Match victory secured.":"Good game. Your next challenge awaits."}</p></div>
   <section class="info-panel"><h2>Leg results</h2>${m.completedLegs.map((l,i)=>`<div class="visit-row"><span>Leg ${i+1}</span><b>${l.winner==="player"?"You":"Bot"}</b><small>${l.playerScore} – ${l.botScore}</small></div>`).join("")}</section>
+  <section class="info-panel"><h2>Match record</h2>
+    <p class="muted">${m.saveStatus==="saved"?"Match saved securely to your online database.":m.saveStatus==="saving"?"Saving match…":m.saveError||"Match has not been saved yet."}</p>
+    ${m.saveStatus==="saved"?"":`<button class="secondary-button full-width" data-action="retry-save">Save match</button>`}
+  </section>
   <button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
 }
 
@@ -184,9 +254,12 @@ function makeNewLeg() {
 }
 function startMatch() {
   state.match={
+    id: (crypto.randomUUID ? crypto.randomUUID() : `match_${Date.now()}_${Math.random().toString(36).slice(2,10)}`),
+    playedAt: new Date().toISOString(),
     game:state.game,bestOf:state.legs,legsToWin:Math.ceil(state.legs/2),
     opponent:{type:state.opponent,level:state.level},
-    playerLegs:0,botLegs:0,completedLegs:[],currentLeg:null,status:"in_progress"
+    playerLegs:0,botLegs:0,completedLegs:[],currentLeg:null,status:"in_progress",
+    saveStatus:"not_started",saveError:""
   };
   state.match.currentLeg=makeNewLeg();
   state.undoStack=[];state.notice="Match started. You're throwing first.";
@@ -216,10 +289,16 @@ function finishLeg(winner) {
     playerFirstNineDarts:firstNineTotals(l.player.visits).darts,
     playerFirstNinePoints:firstNineTotals(l.player.visits).points,
     botFirstNineDarts:firstNineTotals(l.botVisits).darts,
-    botFirstNinePoints:firstNineTotals(l.botVisits).points
+    botFirstNinePoints:firstNineTotals(l.botVisits).points,
+    playerFirstNineAverage:firstNineTotals(l.player.visits).average,
+    botFirstNineAverage:firstNineTotals(l.botVisits).average,
+    playerVisits:JSON.parse(JSON.stringify(l.playerVisits)),
+    botVisits:JSON.parse(JSON.stringify(l.botVisits))
   });
   if(state.match.playerLegs>=state.match.legsToWin||state.match.botLegs>=state.match.legsToWin){
     state.match.status="complete";state.match.currentLeg=null;state.notice="";
+    state.match.completedAt = new Date().toISOString();
+    saveCompletedMatch(state.match);
   } else {
     state.match.currentLeg=makeNewLeg();
     state.notice=`${winner==="player"?"You won":"Bot won"} the leg. Leg ${state.match.completedLegs.length+1} — you're throwing first.`;
@@ -314,6 +393,7 @@ function render() {
   app.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>{
     const a=el.dataset.action;
     if(a==="start-match")startMatch();
+    else if(a==="retry-save" && state.match)saveCompletedMatch(state.match);
     else if(a==="submit-visit")submitPlayerVisit();
     else if(a==="confirm-total")submitTotalVisit();
     else if(a==="record-checkout")recordManualCheckout();
