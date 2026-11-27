@@ -236,13 +236,62 @@ function currentMatchMarkup() {
   <button class="secondary-button full-width landscape-end-match" data-action="abandon-match">End match</button>${checkoutDialog}</div>`;
 }
 
+function matchSideStats(legs, side) {
+  const isPlayer = side === "player";
+  const visits = legs.flatMap(leg => isPlayer
+    ? (leg.playerVisits || leg.player?.visits || [])
+    : (leg.botVisits || leg.bot?.visits || []));
+  const darts = legs.reduce((n, leg) => n + Number(leg[isPlayer ? "playerDarts" : "botDarts"] || 0), 0);
+  const points = legs.reduce((n, leg) => n + Number(leg[isPlayer ? "playerPoints" : "botPoints"] || 0), 0);
+  const first9Darts = legs.reduce((n, leg) => n + Number(leg[isPlayer ? "playerFirstNineDarts" : "botFirstNineDarts"] || 0), 0);
+  const first9Points = legs.reduce((n, leg) => n + Number(leg[isPlayer ? "playerFirstNinePoints" : "botFirstNinePoints"] || 0), 0);
+  const checkoutVisits = visits.filter(v => Number(v.before) >= 2 && Number(v.before) <= 170);
+  const checkouts = visits.filter(v => v.checkout);
+  const checkoutRate = checkoutVisits.length ? checkouts.length / checkoutVisits.length * 100 : null;
+  const highestFinish = checkouts.reduce((best, v) => Math.max(best, Number(v.before) || 0), 0);
+  const highestScore = visits.filter(v => !v.bust).reduce((best, v) => Math.max(best, Number(v.pointsScored) || 0), 0);
+  const legDarts = legs.map(leg => Number(leg[isPlayer ? "playerDarts" : "botDarts"] || 0)).filter(n => n > 0);
+  return {
+    average: darts ? points / darts * 3 : 0,
+    first9: first9Darts ? first9Points / first9Darts * 3 : 0,
+    checkoutRate, checkouts: checkouts.length, checkoutAttempts: checkoutVisits.length,
+    highestFinish, highestScore,
+    bestLeg: legDarts.length ? Math.min(...legDarts) : 0,
+    worstLeg: legDarts.length ? Math.max(...legDarts) : 0
+  };
+}
+function performanceComparison(legs) {
+  const player = matchSideStats(legs, "player");
+  const bot = matchSideStats(legs, "bot");
+  const rows = [
+    [player.average.toFixed(2), "3-DART AVERAGE", bot.average.toFixed(2)],
+    [player.first9.toFixed(2), "FIRST 9 AVG.", bot.first9.toFixed(2)],
+    [player.checkoutRate === null ? "—" : `${player.checkoutRate.toFixed(2)}%`, "CHECKOUT RATE", bot.checkoutRate === null ? "—" : `${bot.checkoutRate.toFixed(2)}%`],
+    [`${player.checkouts} / ${player.checkoutAttempts}`, "CHECKOUTS", `${bot.checkouts} / ${bot.checkoutAttempts}`],
+    [String(player.highestFinish || "—"), "HIGHEST FINISH", String(bot.highestFinish || "—")],
+    [String(player.highestScore || "—"), "HIGHEST SCORE", String(bot.highestScore || "—")],
+    [player.bestLeg ? `${player.bestLeg} DARTS` : "—", "BEST LEG", bot.bestLeg ? `${bot.bestLeg} DARTS` : "—"],
+    [player.worstLeg ? `${player.worstLeg} DARTS` : "—", "WORST LEG", bot.worstLeg ? `${bot.worstLeg} DARTS` : "—"]
+  ];
+  return `<section class="info-panel performance-panel"><div class="section-heading"><h2>Performance overview</h2><span class="muted">YOU vs BOT</span></div><div class="comparison-grid">${rows.map(([left,label,right]) => `<div class="comparison-value player-value">${left}</div><div class="comparison-label">${label}</div><div class="comparison-value bot-value">${right}</div>`).join("")}</div><p class="tiny muted comparison-note">Checkout rate is successful checkout visits divided by visits taken from a finishable score (170 or less).</p></section>`;
+}
+function legReviewMarkup(legs, compact = false) {
+  return `<section class="info-panel"><div class="section-heading"><h2>Leg breakdown</h2><span class="muted">${legs.length} LEGS</span></div>${legs.map((leg,i) => {
+    const playerVisits = leg.playerVisits || leg.player?.visits || [];
+    const botVisits = leg.botVisits || leg.bot?.visits || [];
+    const visitRows = (items, who) => items.map((v,j) => `<div class="review-visit"><span class="review-visit-number">${who} · ${j+1}</span><b class="review-visit-score">${v.bust ? "BUST" : v.checkout ? "CHECKOUT" : Number(v.pointsScored || 0)}</b><small>${v.before ?? "—"} → ${v.after ?? "—"}${v.darts?.length ? ` · ${v.darts.map(d => d.isBull ? "BULL" : d.isDouble ? `D${d.score/2}` : d.isTreble ? `T${d.score/3}` : d.score===25 ? "25" : `S${d.score}`).join(" / ")}` : v.manualCheckout ? ` · ${v.checkoutDarts} darts to finish` : ""}</small></div>`).join("");
+    return `<details class="review-leg" ${i===0 ? "open" : ""}><summary><b>Leg ${i+1} · ${leg.winner === "player" ? "You won" : "Bot won"}</b><span>${leg.playerDarts || 0} – ${leg.botDarts || 0} darts</span><i>⌄</i></summary><div class="review-leg-stats"><span>Your avg <b>${Number(leg.playerAverage || 0).toFixed(2)}</b></span><span>Bot avg <b>${Number(leg.botAverage || 0).toFixed(2)}</b></span><span>Your first 9 <b>${(leg.playerFirstNineDarts ? Number(leg.playerFirstNinePoints || 0) / Number(leg.playerFirstNineDarts) * 3 : 0).toFixed(2)}</b></span><span>Bot first 9 <b>${(leg.botFirstNineDarts ? Number(leg.botFirstNinePoints || 0) / Number(leg.botFirstNineDarts) * 3 : 0).toFixed(2)}</b></span></div><div class="review-side"><h3>You</h3>${visitRows(playerVisits,"You") || `<p class="tiny muted">No visit detail recorded.</p>`}</div><div class="review-side"><h3>Bot</h3>${visitRows(botVisits,"Bot") || `<p class="tiny muted">No visit detail recorded.</p>`}</div></details>`;
+  }).join("")}</section>`;
+}
 function matchSummary() {
-  const m=state.match;
-  return `<section class="page-intro"><p class="eyebrow">MATCH COMPLETE</p><h1>${m.playerLegs>m.botLegs?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponentName()} · Best of ${m.bestOf}</p></section>
-  <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${m.playerLegs>m.botLegs?"Great work. Match victory secured.":"Good game. Your next challenge awaits."}</p></div>
-  <section class="info-panel"><h2>Leg results</h2>${m.completedLegs.map((l,i)=>`<div class="visit-row"><span>Leg ${i+1}</span><b>${l.winner==="player"?"You":"Bot"}</b><small>${l.playerScore} – ${l.botScore}</small></div>`).join("")}</section>
-  <section class="info-panel" aria-live="polite"><h2>Match record</h2><p class="muted">${state.saveStatus || (m.savedToDatabase ? "Match saved to your records." : "Saving match to your records…")}</p>${!m.savedToDatabase && state.saveStatus.startsWith("Match not saved:") ? `<button class="secondary-button full-width" data-action="retry-save">Retry saving match</button>` : ""}</section>
-  <button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
+  const m = state.match;
+  const won = m.playerLegs > m.botLegs;
+  const opponent = opponentName();
+  const legs = m.completedLegs || [];
+  return `<style>${matchReviewStyles()}</style><section class="page-intro"><p class="eyebrow">MATCH COMPLETE</p><h1>${won ? "You won" : "Bot won"} <span>the match</span></h1><p class="muted">${opponent} · ${m.game} · Best of ${m.bestOf} · ${matchDate(m.playedAt)}</p></section><section class="match-result review-result"><div><small>FINAL SCORE</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><div class="review-result-names"><span>YOU</span><span>BOT</span></div></section>${performanceComparison(legs)}${legReviewMarkup(legs)}<section class="info-panel" aria-live="polite"><h2>Match record</h2><p class="muted">${state.saveStatus || (m.savedToDatabase ? "Match saved to your records." : "Saving match to your records…")}</p>${!m.savedToDatabase && state.saveStatus.startsWith("Match not saved:") ? `<button class="secondary-button full-width" data-action="retry-save">Retry saving match</button>` : ""}</section><button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
+}
+function matchReviewStyles() {
+  return `.review-result{display:flex;align-items:center;justify-content:space-between}.review-result>div:first-child strong{font-size:2.3rem}.review-result-names{display:flex;gap:32px;color:#aeb4c2;font-size:.75rem;font-weight:800}.performance-panel{margin-top:14px}.comparison-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(112px,1.35fr) minmax(0,1fr);align-items:center;gap:7px 8px;margin-top:18px}.comparison-value{font-weight:800;font-size:clamp(.92rem,2.5vw,1.2rem);font-variant-numeric:tabular-nums;white-space:nowrap}.player-value{text-align:right;color:#d9b34b}.bot-value{text-align:left;color:#f4f4f4}.comparison-label{background:#30343a;color:#f1f2f4;text-align:center;border-radius:5px;padding:5px 3px;font-size:clamp(.57rem,1.5vw,.7rem);font-weight:800;letter-spacing:.025em}.comparison-note{margin:16px 0 0}.review-leg{border-top:1px solid #34383f;padding:14px 0}.review-leg summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none}.review-leg summary::-webkit-details-marker{display:none}.review-leg summary span{color:#d8b04b;font-weight:700;font-size:.82rem}.review-leg summary i{color:#d8b04b;font-style:normal}.review-leg-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 16px;color:#aeb4c2;margin:14px 0}.review-leg-stats b{color:#fff;margin-left:5px;font-variant-numeric:tabular-nums}.review-side h3{font-size:.82rem;margin:15px 0 6px;color:#d8b04b}.review-visit{display:grid;grid-template-columns:minmax(65px,.8fr) 90px minmax(0,2fr);align-items:center;gap:8px;padding:8px 0;border-top:1px solid #292d32}.review-visit-number{font-size:.78rem;color:#aeb4c2}.review-visit-score{font-size:.9rem;color:#fff}.review-visit small{font-size:.72rem;color:#aeb4c2;text-align:right;overflow-wrap:anywhere}@media(max-width:430px){.comparison-grid{grid-template-columns:minmax(0,1fr) minmax(100px,1.45fr) minmax(0,1fr);gap:6px 5px}.comparison-value{font-size:.85rem}.comparison-label{font-size:.55rem}.review-visit{grid-template-columns:62px 74px minmax(0,1fr);gap:5px}.review-visit small{font-size:.66rem}}`;
 }
 
 
@@ -316,15 +365,7 @@ function matchReviewPage() {
   const won = Number(m.playerLegs) > Number(m.botLegs);
   const opponent = m.opponent?.type === "standard" ? `Standard Bot · Level ${m.opponent.level || 3}` : "My AI Opponent";
   const legs = m.legs || [];
-  return `<section class="page-intro"><p class="eyebrow">MATCH REVIEW · ${matchDate(m.playedAt)}</p><h1>${won?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponent} · ${m.game} · Best of ${m.bestOf}</p></section>
-    <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${won?"Match victory secured.":"Good game. Review the details below."}</p></div>
-    <section class="info-panel"><div class="section-heading"><h2>Leg results</h2><span class="muted">${legs.length} LEGS</span></div>
-    ${legs.map((leg,i) => {
-      const playerVisits = leg.playerVisits || leg.player?.visits || [];
-      const botVisits = leg.botVisits || leg.bot?.visits || [];
-      const visits = (items, who) => items.map((v,j) => `<div class="visit-row"><span>${who} · ${j+1}</span><b>${v.bust?"BUST":v.checkout?"CHECKOUT":v.pointsScored ?? 0}</b><small>${v.before ?? "—"} → ${v.after ?? "—"}${v.darts?.length ? ` · ${v.darts.map(d => d.isBull?"BULL":d.isDouble?`D${d.score/2}`:d.isTreble?`T${d.score/3}`:d.score===25?"25":`S${d.score}`).join(" / ")}` : ""}</small></div>`).join("");
-      return `<details class="review-leg" ${i===0?"open":""}><summary><b>Leg ${i+1} · ${leg.winner==="player"?"You won":"Bot won"}</b><span>${leg.playerScore ?? "—"} – ${leg.botScore ?? "—"}</span></summary><div class="review-leg-stats"><span>Your avg <b>${Number(leg.playerAverage||0).toFixed(1)}</b></span><span>Bot avg <b>${Number(leg.botAverage||0).toFixed(1)}</b></span></div><h3>You</h3>${visits(playerVisits,"You") || `<p class="tiny muted">No visit detail recorded.</p>`}<h3>Bot</h3>${visits(botVisits,"Bot") || `<p class="tiny muted">No visit detail recorded.</p>`}</details>`;
-    }).join("")}</section><button class="secondary-button full-width" data-action="back-history">Back to Match History</button>`;
+  return `<style>${matchReviewStyles()}</style><section class="page-intro"><p class="eyebrow">MATCH REVIEW · ${matchDate(m.playedAt)}</p><h1>${won ? "You won" : "Bot won"} <span>the match</span></h1><p class="muted">${opponent} · ${m.game} · Best of ${m.bestOf}</p></section><section class="match-result review-result"><div><small>FINAL SCORE</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><div class="review-result-names"><span>YOU</span><span>BOT</span></div></section>${performanceComparison(legs)}${legReviewMarkup(legs)}<button class="secondary-button full-width" data-action="back-history">Back to Match History</button>`;
 }
 
 function simplePage(title,subtitle,icon,body) {
@@ -364,7 +405,7 @@ function finishLeg(winner) {
   if(winner==="player")state.match.playerLegs++;else state.match.botLegs++;
   state.match.completedLegs.push({
     winner,playerScore:l.player.remaining,botScore:l.botRemaining,
-    playerAverage:Number(threeDartAverage(l.player).toFixed(1)),
+    playerAverage:Number(threeDartAverage(l.player).toFixed(2)),
     playerDarts:l.player.dartsThrown,
     playerPoints:l.player.pointsScored,
     botAverage:Number(l.botDarts?(l.botPoints/l.botDarts*3).toFixed(1):0),
