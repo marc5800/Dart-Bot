@@ -10,6 +10,7 @@ const state = {
   apiReady: false,
   apiError: "",
   saveStatus: "",
+  historyMatches: [], historyLoading: false, historyError: "", historyMonth: "all", historyVisible: 5, selectedHistoryMatch: null, reviewLoading: false,
   page: "dashboard", opponent: "standard", level: 3, game: 501, legs: 5,
   match: null, undoStack: [], notice: "", lastTurn: null, entryMode: "total", scoreInput: "", checkoutModal: false, checkoutDarts: 3, checkoutAttempts: 1, dartSelections: [],
 };
@@ -93,7 +94,7 @@ async function saveCompletedMatch() {
   render();
 }
 
-function setPage(page) { state.page = page; render(); }
+function setPage(page) { state.page = page; render(); if (page === "history") loadMatchHistory(); }
 function metric(value,label) { return `<article class="metric"><span class="metric-symbol">✦</span><strong>${value}</strong><small>${label}</small></article>`; }
 function feature(icon,title,desc,page) { return `<button class="feature-card" data-action="${page}"><span>${icon}</span><b>${title}</b><small>${desc}</small></button>`; }
 
@@ -244,6 +245,88 @@ function matchSummary() {
   <button class="primary-button full-width" data-action="new-match">New match</button><button class="secondary-button full-width" data-action="dashboard">Dashboard</button>`;
 }
 
+
+async function loadMatchHistory() {
+  state.historyLoading = true;
+  state.historyError = "";
+  render();
+  try {
+    const data = await apiRequest("/api/matches");
+    state.historyMatches = data.matches || [];
+    state.historyVisible = 5;
+  } catch (error) {
+    state.historyError = error.message;
+  } finally {
+    state.historyLoading = false;
+    render();
+  }
+}
+
+function monthLabel(value) {
+  const [year, month] = value.split("-");
+  return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
+function matchDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+function historyPage() {
+  const months = [...new Set(state.historyMatches.map(m => String(m.played_at || "").slice(0, 7)).filter(v => /^\d{4}-\d{2}$/.test(v)))];
+  const filtered = state.historyMatches.filter(m => state.historyMonth === "all" || String(m.played_at || "").startsWith(state.historyMonth));
+  const shown = filtered.slice(0, state.historyVisible);
+  return `<style>
+    .history-panel{margin-top:28px}.history-filter{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0}.history-filter label{color:#aeb4c2;font-size:.9rem}.history-filter select{background:#17191d;color:#fff;border:1px solid #383c43;border-radius:9px;padding:11px 14px;min-width:180px}
+    .history-list{display:grid;gap:9px;margin:16px 0}.history-match-row{display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:14px;background:#111316;border:1px solid #30343a;border-radius:12px;color:#f5f5f5;cursor:pointer}.history-match-row:hover{border-color:#c79b35}.history-result{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-weight:800}.history-result.win{background:#263a2c;color:#8bd19b}.history-result.loss{background:#3a2929;color:#e6a0a0}.history-match-main{display:grid;gap:4px;flex:1;min-width:0}.history-match-main small{color:#9ba3b2;font-size:.78rem}.history-match-row>strong{white-space:nowrap}.history-chevron{color:#d7ad4b;font-size:1.5rem}
+    .review-leg{border-top:1px solid #34383f;padding:14px 0}.review-leg summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;list-style:none}.review-leg summary::-webkit-details-marker{display:none}.review-leg summary span{color:#d8b04b;font-weight:700}.review-leg-stats{display:flex;gap:24px;flex-wrap:wrap;color:#aeb4c2;margin:12px 0}.review-leg-stats b{color:#fff;margin-left:5px}.review-leg h3{font-size:.9rem;margin:16px 0 6px;color:#d8b04b}
+  </style><section class="page-intro"><p class="eyebrow">DARTS BOT</p><h1>Match <span>History</span></h1><p class="muted">Every match, every leg and every improvement.</p></section>
+    <section class="info-panel history-panel">
+      <div class="section-heading"><h2>Your match history</h2><span class="muted">${filtered.length} MATCHES</span></div>
+      <div class="history-filter"><label for="history-month">Filter by month</label><select id="history-month"><option value="all" ${state.historyMonth==="all"?"selected":""}>All matches</option>${months.map(m=>`<option value="${m}" ${state.historyMonth===m?"selected":""}>${monthLabel(m)}</option>`).join("")}</select></div>
+      ${state.historyLoading ? `<p class="muted">Loading your matches…</p>` : ""}
+      ${state.historyError ? `<p class="match-notice">Couldn't load match history: ${state.historyError}</p><button class="secondary-button" data-action="refresh-history">Try again</button>` : ""}
+      ${!state.historyLoading && !state.historyError && !shown.length ? `<p class="muted">No saved matches${state.historyMonth==="all"?" yet":` for ${monthLabel(state.historyMonth)}`}.</p>` : ""}
+      <div class="history-list">${shown.map(m => {
+        const won = Number(m.player_legs) > Number(m.bot_legs);
+        const opponent = m.opponent_type === "standard" ? `Standard Bot${m.bot_level ? ` · Level ${m.bot_level}` : ""}` : "My AI Opponent";
+        return `<button class="history-match-row" data-match-id="${m.id}"><span class="history-result ${won?"win":"loss"}">${won?"W":"L"}</span><span class="history-match-main"><b>${opponent}</b><small>${matchDate(m.played_at)} · ${m.game} · Best of ${m.best_of}</small></span><strong>${m.player_legs}–${m.bot_legs}</strong><span class="history-chevron">›</span></button>`;
+      }).join("")}</div>
+      ${shown.length < filtered.length ? `<button class="secondary-button full-width" data-action="load-more-history">Load more matches</button>` : ""}
+      <p class="tiny muted">Showing the latest ${shown.length} of ${filtered.length} matching records. History currently retrieves up to 100 matches.</p>
+    </section>`;
+}
+async function openMatchReview(id) {
+  state.reviewLoading = true;
+  state.selectedHistoryMatch = null;
+  render();
+  try {
+    const data = await apiRequest(`/api/matches/${encodeURIComponent(id)}`);
+    state.selectedHistoryMatch = data.match;
+    state.page = "review";
+  } catch (error) {
+    state.historyError = error.message;
+    state.page = "history";
+  } finally {
+    state.reviewLoading = false;
+    render();
+  }
+}
+function matchReviewPage() {
+  const m = state.selectedHistoryMatch;
+  if (!m) return `<section class="page-intro"><h1>Match <span>Review</span></h1><p class="muted">Loading match details…</p></section>`;
+  const won = Number(m.playerLegs) > Number(m.botLegs);
+  const opponent = m.opponent?.type === "standard" ? `Standard Bot · Level ${m.opponent.level || 3}` : "My AI Opponent";
+  const legs = m.legs || [];
+  return `<section class="page-intro"><p class="eyebrow">MATCH REVIEW · ${matchDate(m.playedAt)}</p><h1>${won?"You won":"Bot won"} <span>the match</span></h1><p class="muted">${opponent} · ${m.game} · Best of ${m.bestOf}</p></section>
+    <div class="match-result"><div><small>FINAL LEGS</small><strong>${m.playerLegs} – ${m.botLegs}</strong></div><p>${won?"Match victory secured.":"Good game. Review the details below."}</p></div>
+    <section class="info-panel"><div class="section-heading"><h2>Leg results</h2><span class="muted">${legs.length} LEGS</span></div>
+    ${legs.map((leg,i) => {
+      const playerVisits = leg.playerVisits || leg.player?.visits || [];
+      const botVisits = leg.botVisits || leg.bot?.visits || [];
+      const visits = (items, who) => items.map((v,j) => `<div class="visit-row"><span>${who} · ${j+1}</span><b>${v.bust?"BUST":v.checkout?"CHECKOUT":v.pointsScored ?? 0}</b><small>${v.before ?? "—"} → ${v.after ?? "—"}${v.darts?.length ? ` · ${v.darts.map(d => d.isBull?"BULL":d.isDouble?`D${d.score/2}`:d.isTreble?`T${d.score/3}`:d.score===25?"25":`S${d.score}`).join(" / ")}` : ""}</small></div>`).join("");
+      return `<details class="review-leg" ${i===0?"open":""}><summary><b>Leg ${i+1} · ${leg.winner==="player"?"You won":"Bot won"}</b><span>${leg.playerScore ?? "—"} – ${leg.botScore ?? "—"}</span></summary><div class="review-leg-stats"><span>Your avg <b>${Number(leg.playerAverage||0).toFixed(1)}</b></span><span>Bot avg <b>${Number(leg.botAverage||0).toFixed(1)}</b></span></div><h3>You</h3>${visits(playerVisits,"You") || `<p class="tiny muted">No visit detail recorded.</p>`}<h3>Bot</h3>${visits(botVisits,"Bot") || `<p class="tiny muted">No visit detail recorded.</p>`}</details>`;
+    }).join("")}</section><button class="secondary-button full-width" data-action="back-history">Back to Match History</button>`;
+}
+
 function simplePage(title,subtitle,icon,body) {
   return `<section class="page-intro"><p class="eyebrow">DARTS BOT</p><h1>${title}</h1><p class="muted">${subtitle}</p></section><section class="info-panel"><span class="large-symbol">${icon}</span><h2>${body}</h2><p class="muted">This section will connect to your shared match and training records as development continues.</p></section>`;
 }
@@ -390,6 +473,8 @@ function render() {
   if(state.page==="dashboard")content=dashboard();
   else if(state.page==="play")content=playSetup();
   else if(state.page==="match")content=state.match?.status==="complete"?matchSummary():currentMatchMarkup();
+  else if(state.page==="review")content=matchReviewPage();
+  else if(state.page==="history")content=historyPage();
   else if(state.page==="ai")content=aiPage();
   else if(state.page==="training")content=simplePage("Training Centre","Focused practice to sharpen your game.","✣","Your training games");
   else if(state.page==="stats")content=simplePage("Statistics","Track your scoring, finishing and consistency.","▥","Your performance dashboard");
@@ -401,6 +486,9 @@ function render() {
     const a=el.dataset.action;
     if(a==="start-match")startMatch();
     else if(a==="retry-save")saveCompletedMatch();
+    else if(a==="refresh-history")loadMatchHistory();
+    else if(a==="load-more-history"){state.historyVisible+=5;render();}
+    else if(a==="back-history")setPage("history");
     else if(a==="submit-visit")submitPlayerVisit();
     else if(a==="confirm-total")submitTotalVisit();
     else if(a==="record-checkout")recordManualCheckout();
@@ -411,6 +499,8 @@ function render() {
     else if(a==="new-match"){state.match=null;state.undoStack=[];setPage("play");}
     else setPage(a);
   }));
+  app.querySelector("#history-month")?.addEventListener("change", el => { state.historyMonth = el.target.value; state.historyVisible = 5; render(); });
+  app.querySelectorAll("[data-match-id]").forEach(el => el.addEventListener("click", () => openMatchReview(el.dataset.matchId)));
   app.querySelectorAll("[data-dart-code]").forEach(el=>el.addEventListener("click",()=>{
     if(state.dartSelections.length<3){state.dartSelections.push(el.dataset.dartCode);render();}
   }));
